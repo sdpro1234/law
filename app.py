@@ -6,7 +6,11 @@ import time
 import random
 import json
 from datetime import datetime, UTC
-from flask import Flask
+from auth import auth_bp
+from admin import admin_bp
+from client import client_bp
+from lawyer import lawyer_bp
+from judge import judge_bp
 
 
 # ----------------------------

@@ -13,9 +13,6 @@ from lawyer import lawyer_bp
 from judge import judge_bp
 
 
-# ----------------------------
-# App Factory Function
-# ----------------------------
 def create_app():
     app = Flask(__name__)
     # AI helper placed here (clean implementation)
@@ -193,9 +190,7 @@ def create_app():
         except Exception:
             return None
 
-    # ------------------------------
-    # Register Blueprints
-    # ------------------------------
+
     try:
         from auth import auth_bp
         from admin import admin_bp
@@ -217,13 +212,7 @@ def create_app():
         app.logger.error(f'Failed to register blueprints: {e}', exc_info=True)
         raise
 
-    # ------------------------------
-    # Simple in-memory rate limiter (development)
-    # ------------------------------
-    # This protects the frequently-hit `/client/appointments` route from
-    # accidental or malicious repeated GETs. It's deliberately simple and
-    # intended for development or small deployments. For production use
-    # a robust solution like `Flask-Limiter` backed by Redis.
+   
     app.rate_limit_store = {}
     RATE_LIMIT_WINDOW = 60  # seconds
     APPOINTMENTS_LIMIT = 10  # max requests per `RATE_LIMIT_WINDOW` per IP
@@ -291,9 +280,7 @@ def create_app():
             app.logger.exception('Rate limiter failed')
             return None
 
-    # ------------------------------
-    # Create DB + Default Admin User
-    # ------------------------------
+   
     # Ensure SQLAlchemy is initialized with the Flask app
     app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
     # Provide a sensible default database URI if none is set in env/config
@@ -355,9 +342,7 @@ def create_app():
                 db.session.commit()
                 print(f"[INFO] Default admin user created: {default_admin_email}.")
 
-    # ------------------------------
-    # Main Home Route
-    # ------------------------------
+  
     @app.route("/")
     def index():
         # Render the full `base.html` which includes the premium hero and sections.
@@ -383,9 +368,7 @@ def create_app():
 
     # Authentication routes are provided by the `auth` blueprint.
 
-    # ------------------------------
-    # Context Processor
-    # ------------------------------
+    
     @app.context_processor
     def inject_now():
         # Helper to control when sensitive profile fields may be viewed.
@@ -501,24 +484,18 @@ def create_app():
             'recent_case_histories': recent_case_histories
         }
 
-    # ------------------------------
-    # Chrome DevTools JSON Route
-    # ------------------------------
+   
     @app.route('/.well-known/appspecific/com.chrome.devtools.json')
     def chrome_devtools_json():
         return '{}', 200, {'Content-Type': 'application/json'}
 
     return app
 
-# ----------------------------
-# Create App Instance (Gunicorn)
-# ----------------------------
+
 app = create_app()
 
 
-# ----------------------------
-# Run Locally
-# ----------------------------
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
 

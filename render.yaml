@@ -2,8 +2,5 @@ services:
   - type: web
     name: your-service-name
     env: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
-    runtime: python
-    pythonVersion: 3.14.3
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app

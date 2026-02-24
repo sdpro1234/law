@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Case Container */
+    .case-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+    }
+
+    .case-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+
+    /* Form */
+    .case-form {
+        padding: 3rem;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        position: relative;
+        padding-left: 2.5rem;
+    }
+
+    .form-group label::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .form-group:nth-child(1) label::before { content: "📝"; }
+
+    .form-control {
+        width: 100%;
+        padding: 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1.05rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background-color: var(--white);
+        position: relative;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+        transition: var(--transition);
+    }
+
+    .form-control:focus::placeholder {
+        opacity: 0.4;
+        transform: translateY(-2px);
+    }
+
+    /* Character Count */
+    .char-count {
+        position: absolute;
+        bottom: -2rem;
+        right: 1.25rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        transition: var(--transition);
+    }
+
+    .char-count.warning {
+        color: var(--warning-color);
+    }
+
+    .char-count.error {
+        color: var(--danger-color);
+    }
+
+    /* Submit Section */
+    .submit-section {
+        text-align: center;
+        padding: 2rem 3rem 3rem;
+        background: linear-gradient(135deg, var(--light-bg), rgba(66, 153, 225, 0.05));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%231a365d" fill-opacity="0.05" width="100" height="100"/></svg>');
+        background-size: 20px 20px;
+        animation: patternMove 20s linear infinite;
+    }
+
+    @keyframes patternMove {
+        0% { background-position: 0 0; }
+        100% { background-position: 20px 20px; }
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 3rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn::after {
+        content: "🚀";
+        font-size: 1.2rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    /* Help Tips */
+    .help-tips {
+        background: linear-gradient(135deg, rgba(66, 153, 225, 0.1), rgba(66, 153, 225, 0.05));
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 2rem 3rem 0;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .help-tips h3 {
+        color: var(--primary-dark);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .help-tips h3::before {
+        content: "💡";
+        font-size: 1.5rem;
+    }
+
+    .help-tips ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .help-tips li {
+        padding: 0.5rem 0;
+        color: var(--text-secondary);
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .help-tips li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--success-color);
+        font-weight: bold;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .case-container {
+            margin: 0 1rem;
+            border-radius: 16px;
+        }
+
+        .case-form {
+            padding: 2rem;
+        }
+
+        .form-control {
+            padding: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .help-tips {
+            margin: 1rem 1rem 0;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Submit Your Case</h1>
+        <p>Tell us about your legal issue and our AI will find the perfect lawyer for you</p>
+    </div>
+</div>
+
+<!-- Case Container -->
+<div class="case-container">
+    <form method="POST" action="{{ url_for('client.submit_case') }}" class="case-form">
+        <!-- Description Field -->
+        <div class="form-group">
+            <label for="description">Describe your legal issue in detail:</label>
+            <textarea 
+                id="description" 
+                name="description" 
+                rows="8" 
+                required 
+                placeholder="e.g., I am in a dispute with my neighbor over a property line that has existed for 3 years..."
+                maxlength="2000"
+                class="form-control"
+            ></textarea>
+            <div class="char-count" id="charCount">0 / 2000</div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="submit-section">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Get AI Recommendations
+            </button>
+        </div>
+    </form>
+
+    <!-- Help Tips -->
+    <div class="help-tips">
+        <h3>Tips for a Better Match</h3>
+        <ul>
+            <li>Be specific about dates, locations, and people involved</li>
+            <li>Include any relevant documents or evidence you have</li>
+            <li>Describe the outcome you're seeking</li>
+            <li>Keep it detailed but concise (under 2000 characters)</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// Character Counter
+const textarea = document.getElementById('description');
+const charCount = document.getElementById('charCount');
+
+textarea.addEventListener('input', function() {
+    const length = this.value.length;
+    charCount.textContent = `${length} / 2000`;
+    
+    if (length > 1800) {
+        charCount.classList.add('warning');
+    } else {
+        charCount.classList.remove('warning');
+    }
+    
+    if (length >= 2000) {
+        charCount.classList.add('error');
+    } else {
+        charCount.classList.remove('error');
+    }
+});
+
+// Form submission with loading state
+document.querySelector('.case-form').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Add loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
+    
+    // Simulate processing
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }, 3000);
+});
+
+// Add loading spinner style
+const style = document.createElement('style');
+style.textContent = `
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+// Add focus animations
+textarea.addEventListener('focus', function() {
+    this.parentElement.style.transform = 'scale(1.02)';
+});
+
+textarea.addEventListener('blur', function() {
+    this.parentElement.style.transform = 'scale(1)';
+});
+</script>
+{% endblock %}

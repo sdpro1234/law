@@ -1,0 +1,666 @@
+{% extends "base.html" %}
+{% block title %}Refine Your Case Details{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 0 auto;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Progress Indicator */
+    .progress-container {
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.7s ease-out;
+    }
+
+    .progress-bar {
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 33.33%;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--white);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .progress-step.active .step-circle {
+        background: var(--secondary-color);
+        border-color: var(--secondary-color);
+        color: var(--white);
+        transform: scale(1.1);
+        box-shadow: var(--shadow-md);
+    }
+
+    .progress-step.completed .step-circle {
+        background: var(--success-color);
+        border-color: var(--success-color);
+        color: var(--white);
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: center;
+        max-width: 100px;
+    }
+
+    .progress-step.active .step-label {
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+
+    /* Form Container */
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        animation: fadeIn 1s ease-out;
+    }
+
+    /* Question Cards */
+    .question-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        animation: slideUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .question-card:nth-child(1) { animation-delay: 0.1s; }
+    .question-card:nth-child(2) { animation-delay: 0.2s; }
+    .question-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .question-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .question-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .question-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .question-card.answered {
+        background: linear-gradient(135deg, rgba(72, 187, 120, 0.05), rgba(72, 187, 120, 0.02));
+    }
+
+    .question-card.answered::before {
+        background: var(--success-color);
+        transform: scaleY(1);
+    }
+
+    .question-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .question-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border-radius: 50%;
+        font-weight: 600;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .question-title {
+        font-size: 1.25rem;
+        color: var(--primary-dark);
+        margin: 0;
+    }
+
+    .question-text {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    /* Radio Button Group */
+    .radio-group {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .radio-option {
+        position: relative;
+        background: var(--light-bg);
+        border-radius: 12px;
+        padding: 1rem 1rem 1rem 3.5rem;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .radio-option:hover {
+        background: rgba(66, 153, 225, 0.1);
+        transform: translateX(5px);
+    }
+
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .radio-custom {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        background: var(--white);
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        transition: var(--transition);
+    }
+
+    .radio-custom::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 12px;
+        height: 12px;
+        background: var(--secondary-color);
+        border-radius: 50%;
+        transition: var(--transition);
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-custom {
+        border-color: var(--secondary-color);
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-custom::after {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .radio-option input[type="radio"]:checked ~ .radio-label {
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+
+    .radio-label {
+        display: block;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    /* Submit Button */
+    .submit-container {
+        text-align: center;
+        margin-top: 2rem;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .submit-btn.loading .btn-text {
+        display: none;
+    }
+
+    .submit-btn.loading .spinner {
+        display: block;
+    }
+
+    /* Success Message */
+    .success-message {
+        background-color: rgba(72, 187, 120, 0.1);
+        border-left: 4px solid var(--success-color);
+        color: var(--success-color);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: slideDown 0.5s ease-out;
+        display: none;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .question-card {
+            padding: 1.5rem;
+        }
+
+        .radio-option {
+            padding: 1rem 1rem 1rem 3rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>A Few More Questions</h1>
+        <p>To help us find the perfect match, please answer the following questions based on your case description.</p>
+    </div>
+</div>
+
+<!-- Progress Indicator -->
+<div class="progress-container">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-steps">
+        <div class="progress-step active" id="step1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Direct Resolution</div>
+        </div>
+        <div class="progress-step" id="step2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Documentation</div>
+        </div>
+        <div class="progress-step" id="step3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Desired Outcome</div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="form-container">
+    <div class="success-message" id="successMessage">
+        Thank you for providing these details! We're processing your information to find the best match for your case.
+    </div>
+
+    <form action="{{ url_for('client.process_questions') }}" method="POST" id="questionsForm">
+        <!-- Question 1 -->
+        <div class="question-card" id="question1">
+            <div class="question-header">
+                <div class="question-number">1</div>
+                <h3 class="question-title">Question 1 of 3</h3>
+            </div>
+            <p class="question-text">You mentioned "land dispute". Have you already attempted to resolve this directly with your neighbor?</p>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="q1" value="yes" required>
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">Yes, I've tried to resolve this directly</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="q1" value="no">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">No, I haven't attempted direct resolution</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" id="question2">
+            <div class="question-header">
+                <div class="question-number">2</div>
+                <h3 class="question-title">Question 2 of 3</h3>
+            </div>
+            <p class="question-text">Do you have official documents like a property deed or survey map?</p>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="q2" value="yes" required>
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">Yes, I have official documents</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="q2" value="no">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">No, I don't have official documents</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" id="question3">
+            <div class="question-header">
+                <div class="question-number">3</div>
+                <h3 class="question-title">Question 3 of 3</h3>
+            </div>
+            <p class="question-text">What is your desired outcome?</p>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="q3" value="move_fence" required>
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">Have fence moved to correct position</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="q3" value="financial_compensation">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">Receive financial compensation for damages</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="q3" value="formal_agreement">
+                    <span class="radio-custom"></span>
+                    <span class="radio-label">Get a formal boundary agreement documented</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="submit-container">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-text">See My Recommendations</span>
+                <div class="spinner"></div>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Track form progress
+const questions = document.querySelectorAll('.question-card');
+const progressFill = document.getElementById('progressFill');
+const steps = document.querySelectorAll('.progress-step');
+const form = document.getElementById('questionsForm');
+const submitBtn = document.getElementById('submitBtn');
+const successMessage = document.getElementById('successMessage');
+
+// Update progress when a question is answered
+questions.forEach((question, index) => {
+    const radios = question.querySelectorAll('input[type="radio"]');
+    
+    radios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Mark question as answered
+            question.classList.add('answered');
+            
+            // Update progress
+            const answeredQuestions = document.querySelectorAll('.question-card.answered').length;
+            const progress = (answeredQuestions / questions.length) * 100;
+            progressFill.style.width = `${progress}%`;
+            
+            // Update step indicators
+            steps.forEach((step, stepIndex) => {
+                if (stepIndex < answeredQuestions) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (stepIndex === answeredQuestions) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+            
+            // Scroll to next question if not the last one
+            if (index < questions.length - 1) {
+                setTimeout(() => {
+                    questions[index + 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        });
+    });
+});
+
+// Form submission with loading state
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading state
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+    
+    // Simulate form submission
+    setTimeout(() => {
+        // Reset loading state
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        // Show success message
+        successMessage.classList.add('show');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Submit form for real
+        setTimeout(() => {
+            form.submit();
+        }, 2000);
+    }, 2000);
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+questions.forEach((question, index) => {
+    question.style.opacity = '0';
+    question.style.transform = 'translateY(20px)';
+    question.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(question);
+});
+</script>
+{% endblock %}

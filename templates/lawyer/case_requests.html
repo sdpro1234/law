@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+{% block title %}Case Requests{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .filter-select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--white);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    /* Requests List */
+    .requests-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    /* Case Card */
+    .case-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .case-card:nth-child(1) { animation-delay: 0.1s; }
+    .case-card:nth-child(2) { animation-delay: 0.2s; }
+    .case-card:nth-child(3) { animation-delay: 0.3s; }
+    .case-card:nth-child(4) { animation-delay: 0.4s; }
+    .case-card:nth-child(5) { animation-delay: 0.5s; }
+    .case-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .case-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .case-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .case-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    /* Card Header */
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23ffffff" fill-opacity="0.1" width="100" height="100"/></svg>');
+        background-size: 20px 20px;
+        animation: patternMove 20s linear infinite;
+    }
+
+    @keyframes patternMove {
+        0% { background-position: 0 0; }
+        100% { background-position: 20px 20px; }
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-open {
+        background: rgba(72, 187, 120, 0.2);
+        color: var(--success-color);
+    }
+
+    /* Card Content */
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .card-description {
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Card Footer */
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        box-shadow: var(--shadow-xl);
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: var(--white);
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background: rgba(245, 101, 101, 0.2);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn::after {
+        font-size: 1.1rem;
+    }
+
+    .btn-primary::after {
+        content: "✓";
+    }
+
+    .btn-danger::after {
+        content: "✕";
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .requests-list {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>All Open Case Requests</h1>
+        <p>Review and manage new case requests from clients</p>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <div class="filter-group">
+        <label class="filter-label">Filter by Specialization:</label>
+        <select name="filter" id="case-filter">
+            <option value="all">All Specializations</option>
+            <option value="Real Estate Law">Real Estate Law</option>
+            <option value="Family Law">Family Law</option>
+            <option value="Criminal Law">Criminal Law</option>
+            <option value="Corporate Law">Corporate Law</option>
+            <option value="Immigration Law">Immigration Law</option>
+            <option value="Intellectual Property">Intellectual Property</option>
+            <option value="Tax Law">Tax Law</option>
+        </select>
+    </div>
+</div>
+
+<!-- Requests List -->
+<div class="requests-list">
+    {% for case in open_cases %}
+    <div class="case-card">
+        <div class="card-header">
+            <h3>{{ case.category }}</h3>
+            <span class="badge badge-open">Open</span>
+        </div>
+        <p>{{ case.description }}</p>
+        <div class="card-footer">
+            <small>Submitted: {{ case.timestamp.strftime('%Y-%m-%d') }}</small>
+            <div>
+                <a href="{{ url_for('lawyer.view_case_details', case_id=case.id) }}" class="btn button-secondary">Full Details</a>
+                <form method="post" action="{{ url_for('lawyer.accept_case', case_id=case.id) }}" style="display:inline">
+                    <button type="submit" class="btn button-primary">Accept Case</button>
+                </form>
+                <form method="post" action="{{ url_for('lawyer.reject_case', case_id=case.id) }}" style="display:inline; margin-left:8px;">
+                    <button type="submit" class="btn button-danger">Reject Case</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if not open_cases %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h3>No Open Cases</h3>
+        <p>No open case requests at this time. Check back later for new requests from clients.</p>
+        <a href="{{ url_for('lawyer.case_requests') }}" class="btn button-primary">View All Requests</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Filter functionality
+document.getElementById('case-filter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const cards = document.querySelectorAll('.case-card');
+    
+    cards.forEach(card => {
+        const category = card.querySelector('h3').textContent.toLowerCase();
+        if (filterValue === 'all' || category.includes(filterValue)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.case-card').forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    card.style.transitionDelay = `${index * 0.1}s`;
+    observer.observe(card);
+});
+
+// Add hover effects to buttons
+document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-3px) scale(1.02)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Add click animations to buttons
+document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 150);
+    });
+});
+</script>
+{% endblock %}

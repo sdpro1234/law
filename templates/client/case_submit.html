@@ -1,0 +1,569 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Form Container */
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .form-container:hover::before {
+        transform: scaleY(1);
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-header h1 {
+        font-size: 2rem;
+        color: var(--primary-dark);
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-header h1::before {
+        content: "📝";
+        font-size: 1.8rem;
+    }
+
+    .form-header p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Form Elements */
+    .form-group {
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-group textarea {
+        width: 100%;
+        min-height: 200px;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: var(--transition);
+        background-color: var(--white);
+    }
+
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Additional Details Row */
+    .details-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: var(--light-bg);
+        border-radius: 12px;
+        animation: fadeInUp 0.8s ease-out;
+        animation-delay: 0.2s;
+        animation-fill-mode: both;
+    }
+
+    .details-row .form-group {
+        margin-bottom: 0;
+    }
+
+    .details-row label {
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .details-row input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: var(--transition);
+        background-color: var(--white);
+    }
+
+    .details-row input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    /* Generate Button */
+    .generate-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        animation: fadeInUp 0.8s ease-out;
+        animation-delay: 0.3s;
+        animation-fill-mode: both;
+    }
+
+    .generate-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .generate-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .generate-btn:hover::before {
+        left: 100%;
+    }
+
+    .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .generate-btn:active {
+        transform: translateY(0);
+    }
+
+    .generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .generate-btn::after {
+        content: "✨";
+        font-size: 1rem;
+    }
+
+    .status-message {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-message.loading::before {
+        content: '';
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--secondary-color);
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    .status-message.success {
+        color: var(--success-color);
+    }
+
+    .status-message.error {
+        color: var(--danger-color);
+    }
+
+    /* AI Preview Section */
+    .ai-preview {
+        margin-top: 1.5rem;
+        border-left: 4px solid var(--secondary-color);
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(66, 153, 225, 0.05), rgba(66, 153, 225, 0.02));
+        border-radius: 0 12px 12px 0;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.5s ease-out;
+        display: none;
+    }
+
+    .ai-preview.show {
+        display: block;
+    }
+
+    .ai-preview::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+
+    .ai-preview-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .ai-preview-header::before {
+        content: "🤖";
+        font-size: 1.2rem;
+    }
+
+    .ai-preview-text {
+        white-space: pre-wrap;
+        margin-top: 0.75rem;
+        padding: 1rem;
+        background: var(--white);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        max-height: 300px;
+        overflow-y: auto;
+        line-height: 1.6;
+    }
+
+    /* Submit Section */
+    .submit-section {
+        margin-top: 2rem;
+        text-align: center;
+        animation: fadeInUp 0.8s ease-out;
+        animation-delay: 0.4s;
+        animation-fill-mode: both;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--success-color), #38a169);
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn::after {
+        content: "📤";
+        font-size: 1.1rem;
+    }
+
+    /* Loading Spinner */
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .form-container {
+            padding: 1.5rem;
+        }
+
+        .details-row {
+            grid-template-columns: 1fr;
+        }
+
+        .generate-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .submit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Submit Your Case</h1>
+        <p>Provide details about your legal issue and our AI will help generate a comprehensive case description</p>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="form-container">
+    <div class="form-header">
+        <h1>Case Information</h1>
+        <p>Fill in the details below to submit your case for review</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('client.submit_case') }}">
+        <div class="form-group">
+            <label for="description">Case Description:</label>
+            <textarea id="description" name="description" required placeholder="Please provide a detailed description of your legal issue...">{{ prefill_description or '' }}</textarea>
+        </div>
+
+        <div class="details-row">
+            <div class="form-group">
+                <label for="date_time">Date & Time (optional):</label>
+                <input id="date_time" name="date_time" type="datetime-local" />
+            </div>
+            <div class="form-group">
+                <label for="location">Location (optional):</label>
+                <input id="location" name="location" type="text" placeholder="e.g. MG Road, Bangalore" />
+            </div>
+        </div>
+
+        <div class="generate-section">
+            <button type="button" id="generateBtn" class="generate-btn">Generate FIR Report</button>
+            <div id="genStatus" class="status-message"></div>
+        </div>
+
+        <div id="aiPreview" class="ai-preview">
+            <div class="ai-preview-header">Generated FIR report (you can edit before submitting):</div>
+            <div id="aiPreviewText" class="ai-preview-text"></div>
+        </div>
+
+        <div class="submit-section">
+            <button type="submit" class="submit-btn">Submit Case</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('generateBtn').addEventListener('click', async function() {
+    const btn = this;
+    const status = document.getElementById('genStatus');
+    const preview = document.getElementById('aiPreview');
+    const previewText = document.getElementById('aiPreviewText');
+    const description = document.getElementById('description').value || '';
+
+    function setStatus(t, type, ms) {
+        if (!status) return;
+        status.textContent = t || '';
+        status.className = 'status-message ' + (type || '');
+        if (ms) setTimeout(() => { status.textContent = ''; status.className = 'status-message'; }, ms);
+    }
+
+    btn.disabled = true;
+    setStatus('Generating...', 'loading');
+    if (preview) preview.classList.remove('show');
+    
+    try {
+        const date_time = document.getElementById('date_time').value || null;
+        const location = document.getElementById('location').value || null;
+        const res = await fetch('{{ url_for('client.api_generate_description') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hint: description, mode: 'fir', date_time, location })
+        });
+        const data = await res.json();
+
+        if (data && data.rate_limited) {
+            setStatus('Too many requests — please wait a few seconds', 'error', 4000);
+            // keep button disabled briefly to avoid immediate re-clicks
+            setTimeout(() => { btn.disabled = false; setStatus(''); }, 6000);
+            return;
+        }
+
+        const desc = (data && data.description) ? data.description : '';
+        const used_fallback = data && data.used_fallback;
+        const cached = data && data.cached;
+
+        if (desc) {
+            document.getElementById('description').value = desc;
+            if (previewText) previewText.textContent = desc;
+            if (preview) preview.classList.add('show');
+            
+            if (cached) setStatus('Loaded (cached)', 'success', 3000);
+            else setStatus(used_fallback ? 'Generated (fallback used)' : 'Generated', 'success', 3000);
+        } else {
+            setStatus('Generation returned empty result', 'error', 4000);
+        }
+    } catch (e) {
+        console.error(e);
+        setStatus('Generation failed', 'error', 4000);
+    } finally {
+        // If we didn't schedule a cooldown, re-enable button
+        if (!status.textContent.includes('Too many requests')) btn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+{% block title %}Edit My Profile{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    p {
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+        animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    .profile-form {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .profile-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    .form-group:nth-child(5) { animation-delay: 0.5s; }
+    .form-group:nth-child(6) { animation-delay: 0.6s; }
+    .form-group:nth-child(7) { animation-delay: 0.7s; }
+
+    label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    label::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.3s ease;
+    }
+
+    .form-group:focus-within label {
+        color: var(--secondary-color);
+    }
+
+    .form-group:focus-within label::after {
+        width: 100%;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background-color: var(--light-bg);
+        position: relative;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="file"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        background-color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.5;
+    }
+
+    /* Custom File Upload */
+    .file-upload-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-upload-input {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, var(--light-bg), #e2e8f0);
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .file-upload-label:hover {
+        background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .file-upload-label::before {
+        content: '📷';
+        font-size: 1.5rem;
+    }
+
+    .file-name {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    /* Submit Button */
+    .button-primary {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .button-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-primary:hover::before {
+        left: 100%;
+    }
+
+    .button-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+    }
+
+    .button-primary:active {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Profile Preview */
+    .profile-preview {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        display: none;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .profile-preview.active {
+        display: block;
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .preview-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .preview-info h3 {
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .preview-info p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .profile-form {
+            padding: 1.5rem;
+        }
+
+        .button-primary {
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        .profile-form {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <h1>My Professional Profile</h1>
+    <p>Keep your information up-to-date to attract the right clients.</p>
+
+    <form action="{{ url_for('lawyer.edit_profile') }}" method="POST" enctype="multipart/form-data" class="profile-form">
+        <!-- Profile Picture Upload -->
+        <div class="form-group">
+            <label for="profile_picture">Profile Picture</label>
+            <div class="file-upload-wrapper">
+                <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="file-upload-input">
+                <label for="profile_picture" class="file-upload-label">
+                    Choose Profile Picture
+                </label>
+            </div>
+            <div class="file-name" id="file-name">No file selected</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" name="name" id="name" value="{{ current_user.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="bio">Professional Bio</label>
+            <textarea name="bio" id="bio" rows="5">{{ current_user.bio or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="specialization">Primary Specialization</label>
+            <input type="text" name="specialization" id="specialization" value="{{ current_user.specialization }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="experience_years">Years of Experience</label>
+            <input type="number" name="experience_years" id="experience_years" value="{{ current_user.experience_years }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="education">Education</label>
+            <input type="text" name="education" id="education" value="{{ current_user.education or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="bar_number">Bar Number</label>
+            <input type="text" name="bar_number" id="bar_number" value="{{ current_user.bar_number }}" required>
+        </div>
+
+        <button type="submit" class="button-primary">Save Profile</button>
+    </form>
+
+    <!-- Profile Preview -->
+    <div class="profile-preview" id="profile-preview">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Profile Preview</h3>
+        <div class="preview-header">
+            <img src="{{ url_for('static', filename='images/default_avatar.svg') }}" alt="Profile" class="preview-avatar" id="preview-avatar">
+            <div class="preview-info">
+                <h3 id="preview-name">{{ current_user.name }}</h3>
+                <p id="preview-specialization">{{ current_user.specialization }}</p>
+                <p id="preview-experience">{{ current_user.experience_years }} years experience</p>
+            </div>
+        </div>
+        <p id="preview-bio">{{ current_user.bio or 'No bio provided' }}</p>
+    </div>
+</div>
+
+<script>
+    // File upload handling
+    document.getElementById('profile_picture').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'No file selected';
+        document.getElementById('file-name').textContent = fileName;
+        
+        // Show preview if image is selected
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-avatar').src = e.target.result;
+                document.getElementById('profile-preview').classList.add('active');
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Live preview updates
+    document.getElementById('name').addEventListener('input', function(e) {
+        document.getElementById('preview-name').textContent = e.target.value || 'Your Name';
+        document.getElementById('profile-preview').classList.add('active');
+    });
+
+    document.getElementById('specialization').addEventListener('input', function(e) {
+        document.getElementById('preview-specialization').textContent = e.target.value || 'Your Specialization';
+        document.getElementById('profile-preview').classList.add('active');
+    });
+
+    document.getElementById('experience_years').addEventListener('input', function(e) {
+        document.getElementById('preview-experience').textContent = e.target.value + ' years experience';
+        document.getElementById('profile-preview').classList.add('active');
+    });
+
+    document.getElementById('bio').addEventListener('input', function(e) {
+        document.getElementById('preview-bio').textContent = e.target.value || 'No bio provided';
+        document.getElementById('profile-preview').classList.add('active');
+    });
+
+    // Form submission animation
+    document.querySelector('.profile-form').addEventListener('submit', function(e) {
+        const button = document.querySelector('.button-primary');
+        button.textContent = 'Saving...';
+        button.style.background = 'linear-gradient(135deg, var(--success-color), #38a169)';
+        
+        // Simulate save animation (remove this in production)
+        setTimeout(() => {
+            button.textContent = 'Saved Successfully!';
+            setTimeout(() => {
+                button.textContent = 'Save Profile';
+                button.style.background = '';
+            }, 2000);
+        }, 1500);
+    });
+</script>
+{% endblock %}

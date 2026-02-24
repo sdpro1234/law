@@ -1,0 +1,885 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        background: var(--white);
+        padding: 0.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        animation: fadeInUp 0.7s ease-out;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .tab-btn::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 3px;
+        background: var(--secondary-color);
+        transition: width 0.3s ease;
+    }
+
+    .tab-btn:hover {
+        background: var(--light-bg);
+    }
+
+    .tab-btn.active {
+        background: var(--secondary-color);
+        color: var(--white);
+    }
+
+    .tab-btn.active::after {
+        width: 50%;
+    }
+
+    /* Appointment Cards */
+    .appointments-list {
+        display: grid;
+        gap: 1.5rem;
+        animation: fadeIn 1s ease-out;
+    }
+
+    .appointment-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .appointment-card:nth-child(1) { animation-delay: 0.1s; }
+    .appointment-card:nth-child(2) { animation-delay: 0.2s; }
+    .appointment-card:nth-child(3) { animation-delay: 0.3s; }
+    .appointment-card:nth-child(4) { animation-delay: 0.4s; }
+    .appointment-card:nth-child(5) { animation-delay: 0.5s; }
+
+    .appointment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .appointment-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .appointment-row {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .avatar-col {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .lawyer-avatar-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 3px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .appointment-card:hover .lawyer-avatar-large {
+        transform: scale(1.05);
+        border-color: var(--secondary-color);
+    }
+
+    .status-indicator {
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        border: 3px solid var(--white);
+        animation: pulse 2s infinite;
+    }
+
+    .status-indicator.requested {
+        background: var(--warning-color);
+        color: var(--white);
+    }
+
+    .status-indicator.confirmed {
+        background: var(--success-color);
+        color: var(--white);
+    }
+
+    .status-indicator.completed {
+        background: var(--text-secondary);
+        color: var(--white);
+    }
+
+    .status-indicator.cancelled {
+        background: var(--danger-color);
+        color: var(--white);
+    }
+
+    .info-col {
+        flex: 1;
+    }
+
+    .info-col h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+        color: var(--primary-dark);
+    }
+
+    .info-col h3 a {
+        color: inherit;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .info-col h3 a:hover {
+        color: var(--secondary-color);
+        transform: translateX(5px);
+        display: inline-block;
+    }
+
+    .appointment-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .meta-item::before {
+        font-size: 1rem;
+    }
+
+    .meta-item.case::before { content: "📋"; }
+    .meta-item.type::before { content: "📅"; }
+    .meta-item.time::before { content: "🕐"; }
+
+    .appointment-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .appointment-status.requested {
+        background: rgba(237, 137, 54, 0.1);
+        color: var(--warning-color);
+    }
+
+    .appointment-status.confirmed {
+        background: rgba(72, 187, 120, 0.1);
+        color: var(--success-color);
+    }
+
+    .appointment-status.completed {
+        background: rgba(113, 128, 150, 0.1);
+        color: var(--text-secondary);
+    }
+
+    .appointment-status.cancelled {
+        background: rgba(245, 101, 101, 0.1);
+        color: var(--danger-color);
+    }
+
+    .actions-col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+        min-width: 160px;
+    }
+
+    .btn {
+        padding: 0.625rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        border: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-secondary {
+        background: var(--light-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--white);
+        border-color: var(--danger-color);
+        color: var(--danger-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-color), #38a169);
+        color: var(--white);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-chat {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: var(--white);
+    }
+
+    .btn-chat:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Available Lawyers Section */
+    .available-lawyers {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border-color);
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .available-lawyers h2 {
+        font-size: 2rem;
+        color: var(--primary-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .available-lawyers h2::before {
+        content: "⚖️";
+        font-size: 1.8rem;
+    }
+
+    .spec-filter {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .spec-filter strong {
+        color: var(--primary-color);
+        margin-right: 1rem;
+        font-weight: 600;
+    }
+
+    .spec-filter a {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        border-radius: 20px;
+        background-color: var(--light-bg);
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .spec-filter a::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.3s ease;
+        z-index: -1;
+    }
+
+    .spec-filter a:hover {
+        color: var(--white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .spec-filter a:hover::before {
+        width: 100%;
+    }
+
+    .spec-filter a.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .notice-card {
+        background: linear-gradient(135deg, rgba(237, 137, 54, 0.1), rgba(237, 137, 54, 0.05));
+        border-left: 4px solid var(--warning-color);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .lawyer-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .lawyer-item {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .lawyer-item:nth-child(1) { animation-delay: 0.1s; }
+    .lawyer-item:nth-child(2) { animation-delay: 0.2s; }
+    .lawyer-item:nth-child(3) { animation-delay: 0.3s; }
+    .lawyer-item:nth-child(4) { animation-delay: 0.4s; }
+    .lawyer-item:nth-child(5) { animation-delay: 0.5s; }
+
+    .lawyer-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .lawyer-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .lawyer-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .lawyer-item:hover .lawyer-avatar {
+        border-color: var(--secondary-color);
+        transform: scale(1.05);
+    }
+
+    .lawyer-info {
+        flex: 1;
+    }
+
+    .lawyer-name {
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .lawyer-name a {
+        color: inherit;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .lawyer-name a:hover {
+        color: var(--secondary-color);
+    }
+
+    .unverified-badge {
+        background: var(--danger-color);
+        color: var(--white);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        animation: shake 3s infinite;
+    }
+
+    .lawyer-meta {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .lawyer-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+        20%, 40%, 60%, 80% { transform: translateX(2px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .tabs-nav {
+            flex-direction: column;
+        }
+
+        .appointment-row {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .actions-col {
+            flex-direction: row;
+            min-width: auto;
+        }
+
+        .lawyer-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .lawyer-actions {
+            justify-content: center;
+        }
+    }
+
+    /* Loading Animation */
+    .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>My Appointments</h1>
+        <p>Manage and track all your legal consultations</p>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="tabs-nav">
+    <button class="tab-btn active" data-tab="upcoming">Upcoming</button>
+    <button class="tab-btn" data-tab="completed">Completed</button>
+    <button class="tab-btn" data-tab="cancelled">Cancelled</button>
+    <button class="tab-btn" data-tab="all">All Appointments</button>
+</div>
+
+<!-- Appointments List -->
+{% if appointments and appointments|length > 0 %}
+<ul class="appointments-list">
+    {% for appointment in appointments %}
+    <li class="appointment-card">
+        <div class="appointment-row">
+            <div class="avatar-col">
+                {% if appointment.case and appointment.case.lawyer and appointment.case.lawyer.profile_pic %}
+                <img src="/{{ appointment.case.lawyer.profile_pic }}" class="lawyer-avatar-large" alt="{{ appointment.case.lawyer.name }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default_avatar.svg') }}" class="lawyer-avatar-large" alt="Default Avatar">
+                {% endif %}
+                <div class="status-indicator {{ appointment.status }}">
+                    {% if appointment.status == 'requested' %}🕐{% endif %}
+                    {% if appointment.status == 'confirmed' %}✓{% endif %}
+                    {% if appointment.status == 'completed' %}✓{% endif %}
+                    {% if appointment.status == 'cancelled' %}✕{% endif %}
+                </div>
+            </div>
+            <div class="info-col">
+                {% if appointment.case and appointment.case.lawyer %}
+                <h3><a href="{{ url_for('client.public_lawyer_profile', lawyer_id=appointment.case.lawyer.id) }}">{{ appointment.case.lawyer.name }}</a></h3>
+                {% else %}
+                <h3>TBD</h3>
+                {% endif %}
+                <div class="appointment-meta">
+                    <span class="meta-item case">Case #{{ appointment.case_id }}</span>
+                    <span class="meta-item type">{{ appointment.type }}</span>
+                    <span class="meta-item time">{{ appointment.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="appointment-status {{ appointment.status }}">
+                    <span>Status:</span>
+                    <strong>{{ appointment.status.title() }}</strong>
+                </div>
+            </div>
+            <div class="actions-col">
+                {% if appointment.status in ['requested','confirmed'] %}
+                <form method="post" action="{{ url_for('client.cancel_appointment', appt_id=appointment.id) }}" style="display: contents;">
+                    <button type="submit" class="btn btn-secondary">
+                        <span>✕</span>
+                        Cancel
+                    </button>
+                </form>
+                {% if appointment.status == 'confirmed' and appointment.user_id == current_user.id %}
+                <form method="post" action="{{ url_for('client.complete_appointment', appt_id=appointment.id) }}" style="display: contents;">
+                    <button type="submit" class="btn btn-success">
+                        <span>✓</span>
+                        Mark Completed
+                    </button>
+                </form>
+                {% endif %}
+                {% endif %}
+                <a href="{{ url_for('client.chat_page', case_id=appointment.case_id) }}" class="btn btn-chat">
+                    <span>💬</span>
+                    Open Chat
+                </a>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📅</div>
+    <h3>No Appointments Found</h3>
+    <p>You don't have any appointments yet. Find a lawyer and schedule your first consultation.</p>
+    <a href="{{ url_for('client.lawyers') }}" class="btn btn-primary">Find Lawyers</a>
+</div>
+{% endif %}
+
+<!-- Available Lawyers Section -->
+<section class="available-lawyers">
+    <h2>Find a Lawyer</h2>
+    {% if specializations and specializations|length > 0 %}
+    <div class="spec-filter">
+        <strong>Filter by specialization:</strong>
+        <a href="{{ url_for('client.appointments') }}" class="active">All</a>
+        {% for spec in specializations %}
+        | <a href="{{ url_for('client.appointments') }}?spec={{ spec }}">{{ spec }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if available_lawyers and available_lawyers|length > 0 %}
+        {% if not verified_only %}
+        <div class="notice-card">
+            <strong>⚠️ Note:</strong> No verified lawyers are currently available. Showing all registered lawyers — some may not yet be verified by admin. Please review profiles before booking.
+        </div>
+        {% endif %}
+        <ul class="lawyer-list">
+            {% for lawyer in available_lawyers %}
+            <li class="lawyer-item">
+                <div class="lawyer-content">
+                    <img src="{{ ('/' + lawyer.profile_pic) if lawyer.profile_pic else url_for('static', filename='images/default_avatar.svg') }}" alt="{{ lawyer.name }}" class="lawyer-avatar">
+                    <div class="lawyer-info">
+                        <div class="lawyer-name">
+                            <a href="{{ url_for('client.public_lawyer_profile', lawyer_id=lawyer.id) }}">{{ lawyer.name or lawyer.email }}</a>
+                            {% if not lawyer.is_verified %}<span class="unverified-badge">Unverified</span>{% endif %}
+                        </div>
+                        <div class="lawyer-meta">{{ lawyer.specialization or 'General' }} • {{ lawyer.experience_years or 0 }} yrs • {{ lawyer.location or 'Location not set' }}</div>
+                    </div>
+                    <div class="lawyer-actions">
+                        <a class="btn btn-secondary" href="{{ url_for('client.public_lawyer_profile', lawyer_id=lawyer.id) }}">View Profile</a>
+                        <a class="btn btn-primary" href="{{ url_for('client.request_appt_from_profile', lawyer_id=lawyer.id) }}">Request</a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">⚖️</div>
+            <h3>No Lawyers Available</h3>
+            <p>No lawyers registered yet. Try submitting a case and we'll recommend lawyers once available.</p>
+            <a href="{{ url_for('client.submit_case') }}" class="btn btn-primary">Submit a Case</a>
+        </div>
+    {% endif %}
+</section>
+
+<script>
+// Tab functionality
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Here you would typically filter the appointments based on the selected tab
+        const tab = this.dataset.tab;
+        console.log('Switching to tab:', tab);
+        
+        // Add animation to appointment cards
+        document.querySelectorAll('.appointment-card').forEach((card, index) => {
+            card.style.animation = 'none';
+            setTimeout(() => {
+                card.style.animation = `slideUp 0.6s ease-out ${index * 0.1}s both`;
+            }, 10);
+        });
+    });
+});
+
+// Filter functionality
+document.querySelectorAll('.spec-filter a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        document.querySelectorAll('.spec-filter a').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+    });
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.appointment-card, .lawyer-item').forEach(item => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(item);
+});
+
+// Form submission with loading state
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const btn = this.querySelector('button[type="submit"]');
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span> Processing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+    });
+});
+</script>
+{% endblock %}

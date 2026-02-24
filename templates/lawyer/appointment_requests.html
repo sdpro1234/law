@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Requests Container */
+    .requests-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .requests-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: var(--light-bg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .filter-select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--white);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .search-box::before {
+        content: "🔍";
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+    }
+
+    /* Table */
+    .requests-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--white);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .requests-table thead {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+    }
+
+    .requests-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+    }
+
+    .requests-table th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .requests-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition);
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .requests-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .requests-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+    .requests-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+    .requests-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+    .requests-table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+    .requests-table tbody tr:hover {
+        background: rgba(66, 153, 225, 0.05);
+        transform: translateX(5px);
+    }
+
+    .requests-table td {
+        padding: 1rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    /* Table Links */
+    .table-link {
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        position: relative;
+        display: inline-block;
+    }
+
+    .table-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--secondary-color);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .table-link:hover {
+        color: var(--accent-color);
+    }
+
+    .table-link:hover::after {
+        transform: scaleX(1);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .action-btn {
+        background: var(--white);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn.accept {
+        border-color: var(--success-color);
+        color: var(--success-color);
+    }
+
+    .action-btn.accept:hover {
+        background: var(--success-color);
+        color: var(--white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-btn.reject {
+        border-color: var(--danger-color);
+        color: var(--danger-color);
+    }
+
+    .action-btn.reject:hover {
+        background: var(--danger-color);
+        color: var(--white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Action Buttons */
+    .action-section {
+        text-align: center;
+        margin-top: 2rem;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .action-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .action-btn::after {
+        content: "📅";
+        font-size: 1.2rem;
+    }
+
+    .action-btn.secondary {
+        background: var(--white);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        margin-right: 0.5rem;
+    }
+
+    .action-btn.secondary:hover {
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-btn.secondary::after {
+        content: "📁";
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .requests-container {
+            margin: 0 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .search-box {
+            max-width: 100%;
+        }
+
+        .requests-table {
+            font-size: 0.85rem;
+        }
+
+        .requests-table th,
+        .requests-table td {
+            padding: 0.75rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-btn.secondary {
+            margin-right: 0;
+            margin-bottom: 0.75rem;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Appointment Requests</h1>
+        <p>Manage and respond to appointment requests from clients</p>
+    </div>
+</div>
+
+<!-- Requests Container -->
+<div class="requests-container">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label class="filter-label">Filter by Status:</label>
+            <select class="filter-select" id="statusFilter">
+                <option value="all">All Requests</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label class="filter-label">Sort by:</label>
+            <select class="filter-select" id="sortFilter">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="client">Client Name</option>
+                <option value="case">Case Type</option>
+            </select>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" placeholder="Search requests..." id="searchInput">
+        </div>
+    </div>
+
+    <!-- Requests Table -->
+    {% if pending_requests %}
+    <table class="requests-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Case</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appt in pending_requests %}
+            <tr>
+                <td>{{ appt.id }}</td>
+                <td>{{ appt.case.client.name if appt.case and appt.case.client else 'Client' }}</td>
+                <td><a href="{{ url_for('lawyer.view_case_details', case_id=appt.case.id) }}" class="table-link">Case #{{ appt.case.id }}</a></td>
+                <td>{{ appt.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ appt.type }}</td>
+                <td>{{ appt.notes or '' }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <form method="post" action="{{ url_for('lawyer.accept_appointment', appt_id=appt.id) }}" style="display:inline">
+                            <button type="submit" class="action-btn accept">Accept</button>
+                        </form>
+                        <form method="post" action="{{ url_for('lawyer.reject_appointment', appt_id=appt.id) }}" style="display:inline">
+                            <button type="submit" class="action-btn reject">Reject</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <h3>No Appointment Requests</h3>
+        <p>You don't have any pending appointment requests at this time. Check back later for new requests from clients.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Action Section -->
+<div class="action-section">
+    <h3>Quick Actions</h3>
+    <a href="{{ url_for('lawyer.case_requests') }}" class="action-btn secondary">View All Requests</a>
+    {% if example_case_id %}
+        <form method="post" action="{{ url_for('lawyer.seed_request', case_id=example_case_id) }}" style="display:inline;margin-left:.5rem">
+            <button type="submit" class="action-btn secondary">Create Test Request (dev)</button>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+// Filter functionality
+document.getElementById('statusFilter').addEventListener('change', function() {
+    const statusValue = this.value;
+    const rows = document.querySelectorAll('.requests-table tbody tr');
+    
+    rows.forEach(row => {
+        const statusCell = row.cells[5]; // Assuming status is in the 6th column
+        if (statusCell) {
+            const status = statusCell.textContent.toLowerCase();
+            if (statusValue === 'all' || status.includes(statusValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+});
+
+// Sort functionality
+document.getElementById('sortFilter').addEventListener('change', function() {
+    const sortValue = this.value;
+    const tbody = document.querySelector('.requests-table tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        switch(sortValue) {
+            case 'newest':
+                return new Date(b.cells[3].textContent) - new Date(a.cells[3].textContent);
+            case 'oldest':
+                return new Date(a.cells[3].textContent) - new Date(b.cells[3].textContent);
+            case 'client':
+                return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
+            case 'case':
+                return a.cells[2].textContent.localeCompare(b.cells[2].textContent);
+            default:
+                return 0;
+        }
+    });
+    
+    rows.forEach(row => tbody.appendChild(row));
+});
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.requests-table tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.requests-table tbody tr').forEach((row, index) => {
+    row.style.opacity = '0';
+    row.style.transform = 'translateY(20px)';
+    row.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    row.style.transitionDelay = `${index * 0.1}s`;
+    observer.observe(row);
+});
+</script>
+{% endblock %}

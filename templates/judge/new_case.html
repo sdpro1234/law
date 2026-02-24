@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Register Case{% endblock %}
+{% block content %}
+<div style="max-width:800px;margin:24px auto;padding:20px;background:#fff;border-radius:8px;">
+  <h2>Register New Case</h2>
+  <form method="post">
+    <label>Client (Primary)</label><br>
+    <select name="client_id" required>
+      {% for cl in clients %}
+        <option value="{{ cl.id }}">{{ cl.name or cl.email }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Client (Secondary - optional)</label><br>
+    <select name="client2_id">
+      <option value="">-- None --</option>
+      {% for cl in clients %}
+        <option value="{{ cl.id }}">{{ cl.name or cl.email }}</option>
+      {% endfor %}
+    </select><br><br>
+    <label>Category</label><br>
+    <input name="category"><br><br>
+    <button class="button-primary" type="submit">Register Case</button>
+  </form>
+</div>
+{% endblock %}

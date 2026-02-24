@@ -1,0 +1,649 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    /* Profile Card (View Mode) */
+    .profile-card {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .profile-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .profile-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-avatar {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--white);
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(66, 153, 225, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(66, 153, 225, 0); }
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        text-align: center;
+        animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    .profile-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .detail-item {
+        background: var(--light-bg);
+        padding: 1.25rem;
+        border-radius: 12px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .detail-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .detail-item:hover::before {
+        transform: scaleY(1);
+    }
+
+    .detail-item:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .detail-item strong {
+        color: var(--primary-color);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .profile-bio {
+        background: var(--light-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        animation: fadeInUp 0.8s ease-out 0.5s both;
+    }
+
+    .profile-bio h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-bio h3::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    .profile-actions {
+        text-align: center;
+        animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    /* Profile Form (Edit Mode) */
+    .profile-form {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .profile-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    .form-group:nth-child(5) { animation-delay: 0.5s; }
+    .form-group:nth-child(6) { animation-delay: 0.6s; }
+    .form-group:nth-child(7) { animation-delay: 0.7s; }
+    .form-group:nth-child(8) { animation-delay: 0.8s; }
+
+    label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    label::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.3s ease;
+    }
+
+    .form-group:focus-within label {
+        color: var(--secondary-color);
+    }
+
+    .form-group:focus-within label::after {
+        width: 100%;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background-color: var(--light-bg);
+        position: relative;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="file"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        background-color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.5;
+    }
+
+    .current-pic {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .current-pic img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .current-pic img:hover {
+        transform: scale(1.05);
+        border-color: var(--secondary-color);
+    }
+
+    /* Buttons */
+    .button-primary {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .button-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-primary:hover::before {
+        left: 100%;
+    }
+
+    .button-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+    }
+
+    .button-primary:active {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .profile-card, .profile-form {
+            padding: 1.5rem;
+        }
+
+        .profile-details {
+            grid-template-columns: 1fr;
+        }
+
+        .button-primary {
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        .profile-card, .profile-form {
+            padding: 1rem;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    {% set profile_owner = lawyer if lawyer is defined else current_user %}
+
+    {% if view_only is defined and view_only %}
+        <h1>{{ profile_owner.name or 'Lawyer Profile' }}</h1>
+        <div class="profile-card">
+            <div class="profile-header">
+                {% if profile_owner.profile_pic %}
+                    <img src="/{{ profile_owner.profile_pic }}" alt="Profile picture" class="profile-avatar"/>
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default_avatar.svg') }}" alt="Default profile picture" class="profile-avatar"/>
+                {% endif %}
+                <h2 class="profile-name">{{ profile_owner.name }}</h2>
+            </div>
+            
+            <div class="profile-details">
+                <div class="detail-item">
+                    <strong>Specialization</strong>
+                    {{ profile_owner.specialization or 'N/A' }}
+                </div>
+                <div class="detail-item">
+                    <strong>Experience</strong>
+                    {{ profile_owner.experience_years or 0 }} years
+                </div>
+                <div class="detail-item">
+                    <strong>Location</strong>
+                    {{ profile_owner.location or 'N/A' }}
+                </div>
+                <div class="detail-item">
+                    <strong>Education</strong>
+                    {{ profile_owner.education or 'N/A' }}
+                </div>
+                {% if can_view_sensitive(profile_owner) %}
+                    <div class="detail-item">
+                        <strong>Bar Number</strong>
+                        {{ profile_owner.bar_number or 'N/A' }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="profile-bio">
+                <h3>About</h3>
+                <p>{{ profile_owner.bio or 'No bio provided.' }}</p>
+            </div>
+            
+            {% if current_user.is_authenticated and current_user.role == 'client' %}
+                <div class="profile-actions">
+                    <a href="{{ url_for('client.request_appt_from_profile', lawyer_id=profile_owner.id) }}" class="button-primary">Request Appointment</a>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <h1>My Professional Profile</h1>
+        <form method="POST" enctype="multipart/form-data" class="profile-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" value="{{ profile_owner.name or '' }}" placeholder="Full Name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea id="bio" name="bio" rows="4" placeholder="Short professional bio">{{ current_user.bio or '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="education">Education</label>
+                <input type="text" id="education" name="education" value="{{ current_user.education or '' }}" placeholder="Education (Degrees, Institutions)">
+            </div>
+
+            <div class="form-group">
+                <label for="specialization">Specialization</label>
+                <input type="text" id="specialization" name="specialization" value="{{ current_user.specialization or '' }}" placeholder="Specialization (e.g., Real Estate Law)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="experience_years">Years of Experience</label>
+                <input type="number" id="experience_years" name="experience_years" value="{{ current_user.experience_years or 0 }}" placeholder="Years of Experience" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="{{ current_user.location or '' }}" placeholder="Location (City, State)">
+            </div>
+
+            <div class="form-group">
+                <label for="bar_number">Bar Number</label>
+                <input type="text" id="bar_number" name="bar_number" value="{{ current_user.bar_number or '' }}" placeholder="Bar Number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="profile_picture">Profile Picture</label>
+                {% if profile_owner.profile_pic %}
+                    <div class="current-pic">
+                        <img src="/{{ profile_owner.profile_pic }}" alt="Profile picture"/>
+                    </div>
+                {% endif %}
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+            </div>
+
+            <button type="submit" class="button-primary">Update Profile</button>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    // Add interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate detail items on hover
+        const detailItems = document.querySelectorAll('.detail-item');
+        detailItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+        
+        // Animate form inputs on focus
+        const formInputs = document.querySelectorAll('input, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.01)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Add ripple effect to button
+        const button = document.querySelector('.button-primary');
+        if (button) {
+            button.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    /* Make buttons relative for ripple effect */
+    .button-primary {
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

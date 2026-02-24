@@ -1,0 +1,60 @@
+<!-- {% if current_user.is_authenticated %}
+    {% if current_user.role == 'client' %}
+    <aside class="sidebar">
+        <h3>My Account</h3>
+        <ul>
+            <li><a href="{{ url_for('client.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('client.submit_case') }}">Submit New Case</a></li>
+            <li><a href="{{ url_for('client.view_all_cases') }}">View All Cases</a></li>
+            <li><a href="{{ url_for('client.messages') }}">My Messages {% if sidebar_counts.unread_messages %}<span class="count-badge">{{ sidebar_counts.unread_messages }}</span>{% endif %}</a></li>
+            <li><a href="{{ url_for('client.appointments') }}">Booking Status {% if sidebar_counts.upcoming_appointments %}<span class="count-badge">{{ sidebar_counts.upcoming_appointments }}</span>{% endif %}</a></li>
+            <li><a href="{{ url_for('client.lawyers') }}">All Lawyers</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    {% elif current_user.role == 'lawyer' %}
+    <aside class="sidebar">
+        <h3>My Practice</h3>
+        <ul>
+            <li><a href="{{ url_for('lawyer.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('lawyer.edit_profile') }}">My Profile</a></li>
+            <li><a href="{{ url_for('lawyer.my_cases') }}">My Cases &amp; History</a></li>
+                <li><a href="{{ url_for('lawyer.case_requests') }}">Case Requests</a></li>
+                <li><a href="{{ url_for('lawyer.history') }}">Case History</a></li>
+            <li><a href="{{ url_for('lawyer.appointment_requests') }}">Appointment Requests {% if sidebar_counts.pending_appointments %}<span class="count-badge">{{ sidebar_counts.pending_appointments }}</span>{% endif %}</a></li>
+            <li><a href="{{ url_for('lawyer.appointment_schedule') }}">My Schedule {% if sidebar_counts.upcoming_appointments %}<span class="count-badge">{{ sidebar_counts.upcoming_appointments }}</span>{% endif %}</a></li>
+            <li><a href="{{ url_for('lawyer.my_cases') }}">Case History</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    {% elif current_user.role == 'admin' %}
+    <aside class="sidebar">
+        <h3>Administration</h3>
+        <ul>
+            <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('admin.verify_lawyers') }}">Verify Lawyers</a></li>
+            <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
+            <li><a href="{{ url_for('admin.view_cases') }}">View Cases</a></li>
+            <li><a href="{{ url_for('admin.complaints') }}">Complaints</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    {% else %}
+    <aside class="sidebar">
+        <h3>Account</h3>
+        <ul>
+            <li><a href="{{ url_for('dashboard_router') }}">My Dashboard</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        </ul>
+    </aside>
+    {% endif %}
+{% else %} -->
+<!-- Not logged in: show minimal sidebar -->
+<!-- <aside class="sidebar">
+    <h3>Explore</h3>
+    <ul>
+        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+    </ul>
+</aside> -->
+<!-- {% endif %} -->

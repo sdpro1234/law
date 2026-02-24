@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+{% block title %}Client Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .dashboard-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .dashboard-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--white);
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Content Section */
+    .content-section {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23ffffff" fill-opacity="0.1" width="100" height="100"/></svg>');
+        background-size: 20px 20px;
+        animation: patternMove 20s linear infinite;
+    }
+
+    @keyframes patternMove {
+        0% { background-position: 0 0; }
+        100% { background-position: 20px 20px; }
+    }
+
+    .section-header h2 {
+        font-size: 1.75rem;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-content {
+        padding: 2rem;
+    }
+
+    /* Case Cards */
+    .cases-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        animation: fadeIn 1s ease-out;
+    }
+
+    .case-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .case-card:nth-child(1) { animation-delay: 0.1s; }
+    .case-card:nth-child(2) { animation-delay: 0.2s; }
+    .case-card:nth-child(3) { animation-delay: 0.3s; }
+    .case-card:nth-child(4) { animation-delay: 0.4s; }
+    .case-card:nth-child(5) { animation-delay: 0.5s; }
+    .case-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .case-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .case-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .case-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-open {
+        background: rgba(72, 187, 120, 0.1);
+        color: var(--success-color);
+    }
+
+    .badge-in-progress {
+        background: rgba(66, 153, 225, 0.1);
+        color: var(--secondary-color);
+    }
+
+    .badge-closed {
+        background: rgba(113, 128, 150, 0.1);
+        color: var(--text-secondary);
+    }
+
+    .badge-pending {
+        background: rgba(237, 137, 54, 0.1);
+        color: var(--warning-color);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .card-description {
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-footer {
+        padding: 1.5rem;
+        background: var(--light-bg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .lawyer-info {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Lawyer List */
+    .lawyer-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .lawyer-item {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        width: calc(50% - 0.5rem);
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .lawyer-item:nth-child(1) { animation-delay: 0.1s; }
+    .lawyer-item:nth-child(2) { animation-delay: 0.2s; }
+    .lawyer-item:nth-child(3) { animation-delay: 0.3s; }
+    .lawyer-item:nth-child(4) { animation-delay: 0.4s; }
+
+    .lawyer-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .lawyer-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .lawyer-item:hover .lawyer-avatar {
+        border-color: var(--secondary-color);
+    }
+
+    .lawyer-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    .lawyer-name {
+        font-weight: 600;
+        color: var(--primary-dark);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .lawyer-name:hover {
+        color: var(--secondary-color);
+    }
+
+    .lawyer-meta {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .unverified-badge {
+        background: var(--danger-color);
+        color: var(--white);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        background: linear-gradient(135deg, var(--light-bg), rgba(66, 153, 225, 0.05));
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+        text-align: center;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn {
+        background: var(--white);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(66, 153, 225, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn::after {
+        font-size: 1.2rem;
+    }
+
+    .btn:nth-child(1)::after { content: "📁"; }
+    .btn:nth-child(2)::after { content: "💬"; }
+    .btn:nth-child(3)::after { content: "📅"; }
+    .btn:nth-child(4)::after { content: "➕"; }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .cases-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .lawyer-item {
+            width: 100%;
+        }
+
+        .actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+        }
+
+        .cases-grid {
+            gap: 1rem;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn {
+            padding: 0.875rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="dashboard-header-content">
+        <h1>Welcome back, {{ current_user.name }}!</h1>
+        <p>Here's an overview of your legal cases and activities</p>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📁</div>
+        <div class="stat-value">{{ active_cases_count }}</div>
+        <div class="stat-label">Active Cases</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">{{ upcoming_appointments_count }}</div>
+        <div class="stat-label">Upcoming Appointments</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value">{{ unread_messages_count }}</div>
+        <div class="stat-label">Unread Messages</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⚖️</div>
+        <div class="stat-value">{{ assigned_lawyers_count }}</div>
+        <div class="stat-label">Assigned Lawyers</div>
+    </div>
+</div>
+
+<!-- Recent Cases Section -->
+<div class="content-section">
+    <div class="section-header">
+        <h2>Recent Cases</h2>
+    </div>
+    <div class="section-content">
+        <div class="cases-grid">
+            {% for case in recent_cases %}
+            <div class="case-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        {{ case.category }}
+                    </div>
+                    <div class="badge badge-{{ case.status }}">
+                        {{ case.status.title() }}
+                    </div>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">{{ case.description }}</p>
+                </div>
+                <div class="card-footer">
+                    <div class="lawyer-info">
+                        Lawyer: {{ case.lawyer.name if case.lawyer else 'Not Assigned' }}
+                    </div>
+                    <a href="{{ url_for('client.case_detail', case_id=case.id) }}" class="btn">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Available Lawyers Section -->
+{% if available_lawyers and available_lawyers|length > 0 %}
+<div class="content-section">
+    <div class="section-header">
+        <h2>Find a Lawyer</h2>
+    </div>
+    <div class="section-content">
+        <p class="muted">Browse verified lawyers or request an appointment directly.</p>
+        <ul class="lawyer-list">
+            {% for lawyer in available_lawyers %}
+            <li class="lawyer-item">
+                <img src="{{ ('/' + lawyer.profile_pic) if lawyer.profile_pic else url_for('static', filename='images/default_avatar.svg') }}" alt="avatar" class="lawyer-avatar">
+                <div class="lawyer-details">
+                    <a href="{{ url_for('client.public_lawyer_profile', lawyer_id=lawyer.id) }}" class="lawyer-name">{{ lawyer.name or lawyer.email }}</a>
+                    {% if not lawyer.is_verified %}<span class="unverified-badge">Unverified</span>{% endif %}
+                    <div class="lawyer-meta">{{ lawyer.specialization or 'General' }} • {{ lawyer.experience_years or 0 }} yrs</div>
+                </div>
+                <div>
+                    <a href="{{ url_for('client.request_appt_from_profile', lawyer_id=lawyer.id) }}" class="btn">Request</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <div style="margin-top: 1rem; text-align: center;">
+            <a href="{{ url_for('client.lawyers') }}" class="btn btn-primary">See all lawyers</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="actions-grid">
+        <a href="{{ url_for('client.view_all_cases') }}" class="btn">View All Cases</a>
+        <a href="{{ url_for('client.messages') }}" class="btn">My Messages</a>
+        <a href="{{ url_for('client.appointments') }}" class="btn">My Appointments</a>
+        <a href="{{ url_for('client.submit_case') }}" class="btn btn-primary">Submit New Case</a>
+    </div>
+</div>
+
+<script>
+// Add hover effects to stat cards
+document.querySelectorAll('.stat-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.case-card, .lawyer-item').forEach(item => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(item);
+});
+
+// Add click animation to buttons
+document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+});
+
+// Add ripple effect style
+const style = document.createElement('style');
+style.textContent = `
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,641 @@
+{% extends "base.html" %}
+{% block title %}Lawyer Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s ease;
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .stat-card h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    .stat-card:nth-child(5) { animation-delay: 0.5s; }
+
+    /* Cards */
+    .card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .card:hover::before {
+        opacity: 0.05;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        position: relative;
+        z-index: 1;
+    }
+
+    .card p {
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        position: relative;
+        z-index: 1;
+    }
+
+    .card strong {
+        color: var(--primary-dark);
+    }
+
+    /* Profile Summary */
+    .profile-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Buttons */
+    .button-primary, .button-secondary {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .button-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .button-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-primary:hover::before {
+        left: 100%;
+    }
+
+    .button-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .button-secondary:hover {
+        background: var(--primary-color);
+        color: var(--white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Content Sections */
+    .content-section {
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .content-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+    }
+
+    .content-section h2::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    .content-section p {
+        margin-bottom: 1.5rem;
+        color: var(--text-secondary);
+    }
+
+    .content-section a {
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .content-section a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--secondary-color);
+        transition: width 0.3s ease;
+    }
+
+    .content-section a:hover::after {
+        width: 100%;
+    }
+
+    /* Case Cards */
+    .case-card {
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.5s ease-out;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card-header h3 {
+        margin-bottom: 0;
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-new {
+        background: var(--success-color);
+        color: var(--white);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(72, 187, 120, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card-footer small {
+        color: var(--text-secondary);
+    }
+
+    .card-footer div {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Appointment List */
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    ul li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        background: var(--white);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    ul li:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    ul li strong {
+        color: var(--primary-color);
+    }
+
+    ul li small {
+        color: var(--text-secondary);
+    }
+
+    ul li div {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .card-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .card-footer div {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        ul li {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        ul li div {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <h1>Welcome, {{ current_user.name }}</h1>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ new_requests_count }}</h3>
+            <p>New Case Requests</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ active_cases_count }}</h3>
+            <p>Active Cases</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ earnings_this_month }}</h3>
+            <p>Earnings This Month</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ pending_appointments_count }}</h3>
+            <p>Pending Appointments</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ upcoming_appointments_count }}</h3>
+            <p>Upcoming Appointments</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>My Profile Summary</h3>
+        <div class="profile-summary">
+            <p><strong>Name:</strong> {{ current_user.name }}</p>
+            <p><strong>Specialization:</strong> {{ current_user.specialization or 'N/A' }}</p>
+            <p><strong>Experience:</strong> {{ current_user.experience_years or 0 }} years</p>
+            <p><strong>Location:</strong> {{ current_user.location or 'N/A' }}</p>
+            {% if current_user.is_verified or current_user.role == 'admin' %}
+                {% if can_view_sensitive(current_user) %}
+                    <p><strong>Bar Number:</strong> {{ current_user.bar_number or 'N/A' }}</p>
+                    <p><strong>Email:</strong> {{ current_user.email }}</p>
+                {% endif %}
+            {% else %}
+                <p><em>Sensitive details are hidden until your account is verified by admin.</em></p>
+            {% endif %}
+            <p><a href="{{ url_for('lawyer.edit_profile') }}" class="button-secondary">Edit Profile</a></p>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>New Case Requests</h2>
+        <p><a href="{{ url_for('lawyer.appointment_requests') }}">View Appointment Requests</a> | <a href="{{ url_for('lawyer.appointment_schedule') }}">My Schedule</a></p>
+        {% for case in new_requests %}
+        <div class="card case-card">
+            <div class="card-header">
+                <h3>{{ case.category }}</h3>
+                <span class="badge badge-new">New</span>
+            </div>
+            <p>{{ case.description[:100] }}...</p>
+            <div class="card-footer">
+                <small>Client: Anonymous</small>
+                <div>
+                    <a href="{{ url_for('lawyer.view_case_details', case_id=case.id) }}" class="button-secondary">View Details</a>
+                    <form method="post" action="{{ url_for('lawyer.accept_case', case_id=case.id) }}" style="display:inline">
+                        <button type="submit" class="button-primary">Accept Case</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="content-section">
+        <h2>Pending Appointment Requests</h2>
+        {% if pending_appointments_list and pending_appointments_list|length > 0 %}
+            <ul>
+                {% for appt in pending_appointments_list %}
+                <li>
+                    <div>
+                        <strong>Case #{{ appt.case_id }}</strong> — {{ appt.case.client.name if appt.case and appt.case.client else 'Client' }}<br>
+                        <small>{{ appt.timestamp.strftime('%Y-%m-%d %H:%M') }} • {{ appt.type }}</small>
+                    </div>
+                    <div>
+                        <form method="post" action="{{ url_for('lawyer.accept_appointment', appt_id=appt.id) }}" style="display:inline">
+                            <button class="button-primary" type="submit">Accept</button>
+                        </form>
+                        <form method="post" action="{{ url_for('lawyer.reject_appointment', appt_id=appt.id) }}" style="display:inline">
+                            <button class="button-secondary" type="submit">Reject</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No pending appointment requests.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Add interactive animations on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat cards on hover
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+        
+        // Animate buttons on click
+        const buttons = document.querySelectorAll('.button-primary, .button-secondary');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    /* Make buttons relative for ripple effect */
+    .button-primary, .button-secondary {
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

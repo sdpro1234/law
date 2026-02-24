@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>My Cases</h2>
+{% if cases %}
+  <table>
+    <thead>
+      <tr><th></th><th>Case ID</th><th>Category</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+    {% for c in cases %}
+      <tr>
+        <td><input type="checkbox" class="case-checkbox" value="{{ c.id }}" /></td>
+        <td>{{ c.id }}</td>
+        <td>{{ c.category }}</td>
+        <td>{{ c.status }}</td>
+        <td>{{ c.timestamp.strftime('%Y-%m-%d') }}</td>
+        <td>
+          <a href="{{ url_for('lawyer.view_case_details', case_id=c.id) }}">View</a>
+          |
+          <a href="{{ url_for('lawyer.case_history', case_id=c.id) }}">History</a>
+          |
+          <!-- Per-row send to judge control -->
+          <select id="judge_select_{{ c.id }}" style="margin-left:0.5rem;">
+            <option value="">Send to judge</option>
+            {% for j in judges %}
+              <option value="{{ j.id }}">{{ j.name or j.email }}</option>
+            {% endfor %}
+          </select>
+          <button class="button-secondary" type="button" onclick="sendSingle({{ c.id }}, 'judge_select_{{ c.id }}')">Send</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Bulk send controls -->
+  <div style="margin-top:1rem; display:flex; gap:1rem; align-items:center;">
+    <label for="bulk_judge">Send selected to judge:</label>
+    <select id="bulk_judge">
+      <option value="">-- choose judge --</option>
+      {% for j in judges %}
+        <option value="{{ j.id }}">{{ j.name or j.email }}</option>
+      {% endfor %}
+    </select>
+    <button class="button-primary" type="button" onclick="sendBulk()">Send Selected</button>
+  </div>
+{% else %}
+  <p>You have no assigned cases yet.</p>
+{% endif %}
+
+<a href="{{ url_for('lawyer.dashboard') }}">Back to Dashboard</a>
+
+<script>
+function sendSingle(caseId, selectId){
+  const sel = document.getElementById(selectId);
+  if(!sel) return alert('Judge selector not found');
+  const judgeId = sel.value;
+  if(!judgeId) return alert('Please select a judge');
+  const fd = new FormData();
+  fd.append('case_ids', caseId);
+  fd.append('judge_id', judgeId);
+  fetch('{{ url_for('lawyer.send_to_judge') }}', { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(()=> location.reload())
+    .catch(()=> alert('Failed to send to judge'));
+}
+
+function sendBulk(){
+  const checked = Array.from(document.querySelectorAll('.case-checkbox:checked')).map(cb=>cb.value);
+  if(checked.length === 0) return alert('No cases selected');
+  const judgeId = document.getElementById('bulk_judge').value;
+  if(!judgeId) return alert('Please select a judge');
+  const fd = new FormData();
+  checked.forEach(id=>fd.append('case_ids', id));
+  fd.append('judge_id', judgeId);
+  fetch('{{ url_for('lawyer.send_to_judge') }}', { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(()=> location.reload())
+    .catch(()=> alert('Failed to send selected cases'));
+}
+</script>
+{% endblock %}

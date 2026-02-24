@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Judge Dashboard{% endblock %}
+{% block content %}
+<style>
+/* Premium dashboard styles for judge */
+.judge-wrap{max-width:1100px;margin:20px auto;padding:22px;background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,0.06);border:1px solid rgba(15,23,42,0.03);}
+.jd-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.jd-title{font-size:1.6rem;color:#08203a;font-weight:700}
+.jd-actions{display:flex;gap:10px}
+.jd-card-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.jd-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(8,32,58,0.04);border:1px solid rgba(10,24,56,0.03);transition:transform .18s ease,box-shadow .18s}
+.jd-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(8,32,58,0.06)}
+.jd-card h4{margin:0 0 8px 0;color:#0b2a4a}
+.case-list{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.case-panel{background:linear-gradient(180deg,#ffffff,#fbfbff);border-radius:10px;padding:12px;border:1px solid rgba(12,34,70,0.03)}
+.case-item{padding:10px;border-radius:8px;margin-bottom:8px;background:linear-gradient(90deg,#fff,#f7fbff);display:flex;justify-content:space-between;align-items:center;transition:transform .14s ease,opacity .14s}
+.case-item:hover{transform:translateX(6px)}
+.muted{color:#5b6b7a}
+.empty{color:#94a3b8;font-style:italic}
+.action-btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+.primary{background:linear-gradient(90deg,#1460f0,#0a84ff);color:#fff}
+.secondary{background:#eef2ff;color:#0b2a4a}
+@keyframes pop {from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.case-item{animation:pop .28s ease both}
+</style>
+
+<div class="judge-wrap">
+  <div class="jd-header">
+    <div>
+      <div class="jd-title">Judge Dashboard</div>
+      <div class="muted">Welcome back — quick overview of your caseload</div>
+    </div>
+    <div class="jd-actions">
+      <a href="{{ url_for('judge.new_case') }}" class="action-btn primary">Register New Case</a>
+      <!-- <a href="{{ url_for('judge.register_clients') }}" class="action-btn secondary">Register Clients</a> -->
+    </div>
+  </div>
+
+  <div class="jd-card-row">
+    <div class="jd-card">
+      <h4>Assigned Cases</h4>
+      <div class="muted">Cases currently assigned to you</div>
+      <div style="margin-top:10px;font-size:1.05rem;font-weight:600">{{ assigned|length }}</div>
+    </div>
+    <div class="jd-card">
+      <h4>Open Cases</h4>
+      <div class="muted">Unassigned or open cases</div>
+      <div style="margin-top:10px;font-size:1.05rem;font-weight:600">{{ open_cases|length }}</div>
+    </div>
+    <div class="jd-card">
+      <h4>Managed Clients</h4>
+      <div class="muted">Clients you've registered</div>
+      <div style="margin-top:10px;font-size:1.05rem;font-weight:600">{{ managed_count }}</div>
+    </div>
+  </div>
+
+  <div class="case-list">
+    <div class="case-panel">
+      <h4>Assigned Cases</h4>
+      {% if assigned %}
+        {% for c in assigned %}
+          <div class="case-item"><div><a href="{{ url_for('judge.view_case', case_id=c.id) }}">Case #{{ c.id }} — {{ c.category }}</a><div class="muted" style="font-size:0.9rem">Status: {{ c.status }}{% if c.client %} • Client: {{ c.client.name or c.client.email }}{% endif %}</div></div><div><a href="{{ url_for('judge.view_case', case_id=c.id) }}" class="action-btn secondary">Open</a></div></div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No assigned cases</div>
+      {% endif %}
+    </div>
+    <div class="case-panel">
+      <h4>Open Cases</h4>
+      {% if open_cases %}
+        {% for c in open_cases %}
+          <div class="case-item"><div><a href="{{ url_for('judge.view_case', case_id=c.id) }}">Case #{{ c.id }} — {{ c.category }}</a><div class="muted" style="font-size:0.9rem">Primary: {{ c.client.name or c.client.email }}</div></div><div><a href="{{ url_for('judge.view_case', case_id=c.id) }}" class="action-btn primary">View</a></div></div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No open cases</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

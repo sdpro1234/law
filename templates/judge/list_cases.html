@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}All Cases{% endblock %}
+{% block content %}
+<style>
+/* Premium styles for All Cases */
+.cases-wrap{max-width:1200px;margin:22px auto;padding:20px;background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,0.06);border:1px solid rgba(15,23,42,0.03)}
+.cases-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.cases-title{font-size:1.5rem;color:#07203a;font-weight:700}
+.cases-controls{display:flex;gap:10px;align-items:center}
+.search-input{padding:10px 12px;border-radius:10px;border:1px solid rgba(14,35,78,0.06);min-width:320px}
+.filter-select{padding:10px 12px;border-radius:10px;border:1px solid rgba(14,35,78,0.06)}
+.cases-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:18px}
+.case-card{background:linear-gradient(180deg,#fff,#fbfbff);padding:14px;border-radius:10px;border:1px solid rgba(12,34,70,0.03);box-shadow:0 8px 20px rgba(12,34,70,0.04);transition:transform .18s ease,box-shadow .18s;display:flex;flex-direction:column;gap:8px}
+.case-card:hover{transform:translateY(-8px);box-shadow:0 22px 48px rgba(12,34,70,0.08)}
+.case-meta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.case-id{font-weight:700;color:#0b2a4a}
+.case-cat{background:linear-gradient(90deg,#eef2ff,#f7f7ff);padding:6px 8px;border-radius:8px;color:#213a66;font-weight:600}
+.case-status{padding:6px 10px;border-radius:999px;font-weight:700;font-size:0.85rem}
+.status-open{background:#e6f6ff;color:#0369a1}
+.status-assigned{background:#ecfdf5;color:#027a48}
+.status-closed{background:#fff1f0;color:#9a3412}
+.case-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.case-actions a{padding:8px 10px;border-radius:8px;text-decoration:none;color:#fff}
+.btn-view{background:linear-gradient(90deg,#1460f0,#0a84ff)}
+.btn-assign{background:linear-gradient(90deg,#06b6d4,#3b82f6)}
+.muted{color:#64748b}
+@keyframes floatUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.case-card{animation:floatUp .28s ease both}
+</style>
+
+<div class="cases-wrap">
+  <div class="cases-header">
+    <div>
+      <div class="cases-title">All Cases</div>
+      <div class="muted">Browse, filter and open cases</div>
+    </div>
+    <div class="cases-controls">
+      <input id="case-search" class="search-input" placeholder="Search by client, category, or case #" />
+      <select id="case-filter" class="filter-select">
+        <option value="all">All statuses</option>
+        <option value="open">Open</option>
+        <option value="assigned">Assigned</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="cases-grid" class="cases-grid">
+    {% for c in cases %}
+      <div class="case-card" data-status="{{ c.status|lower }}" data-search="Case {{ c.id }} {{ c.category }} {{ (c.client.name if c.client else '') }} {{ (c.client.email if c.client else '') }}">
+        <div class="case-meta">
+          <div>
+            <div class="case-id">Case #{{ c.id }}</div>
+            <div class="muted" style="font-size:0.95rem">{{ c.category }}</div>
+          </div>
+          <div>
+            <div class="case-cat">{{ c.client.name if c.client else 'No client' }}</div>
+            <div style="height:8px"></div>
+            <div class="case-status {% if c.status=='open' %}status-open{% elif c.status=='assigned' %}status-assigned{% else %}status-closed{% endif %}">{{ c.status }}</div>
+          </div>
+        </div>
+        <div class="muted">{{ c.description|truncate(140) }}</div>
+        <div class="case-footer">
+          <div class="muted">Submitted: {{ c.timestamp.strftime('%Y-%m-%d') if c.timestamp else 'N/A' }}</div>
+          <div class="case-actions">
+            <a class="btn-view" href="{{ url_for('judge.view_case', case_id=c.id) }}">View</a>
+            {% if not c.judge_id %}
+              <a class="btn-assign" href="{{ url_for('judge.view_case', case_id=c.id) }}">Assign</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="muted">No cases found</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+// Simple client-side search + filter
+document.getElementById('case-search').addEventListener('input', function(e){
+  var q = e.target.value.toLowerCase();
+  Array.from(document.querySelectorAll('#cases-grid .case-card')).forEach(function(card){
+    var text = (card.dataset.search||'').toLowerCase();
+    card.style.display = text.indexOf(q) !== -1 ? '' : 'none';
+  });
+});
+document.getElementById('case-filter').addEventListener('change', function(e){
+  var f = e.target.value;
+  Array.from(document.querySelectorAll('#cases-grid .case-card')).forEach(function(card){
+    var s = card.dataset.status || 'open';
+    card.style.display = (f==='all' || s===f) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

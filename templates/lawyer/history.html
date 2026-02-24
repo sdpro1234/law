@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Case History (All)</h2>
+{% if entries %}
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Case ID</th>
+        <th>Action</th>
+        <th>Actor</th>
+        <th>Details</th>
+        <th>Share</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in entries %}
+      <tr>
+        <td>{{ e.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><a href="{{ url_for('lawyer.case_history', case_id=e.case_id) }}">#{{ e.case_id }}</a></td>
+        <td>{{ e.action.replace('_',' ') }}</td>
+        <td>{% if e.actor %}{{ e.actor.name or e.actor.email }}{% else %}-{% endif %}</td>
+        <td>{{ e.details or '' }}</td>
+        <td>
+          <button type="button" class="btn btn-link share-btn" data-case-id="{{ e.case_id }}">Share / Send</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No history entries found for your assigned cases.</p>
+{% endif %}
+<a href="{{ url_for('lawyer.dashboard') }}">Back to Dashboard</a>
+{% endblock %}
+
+{% block scripts %}
+  <style>
+    /* Simple modal styling */
+    .ltc-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; }
+    .ltc-modal { background: white; padding: 1rem; border-radius: 6px; width: 360px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .ltc-modal h4 { margin-bottom: 0.5rem; }
+    .ltc-modal .actions { margin-top: 1rem; text-align: right; }
+  </style>
+  <div id="ltc-share-modal" class="ltc-modal-overlay" role="dialog" aria-hidden="true">
+    <div class="ltc-modal" role="document">
+      <h4>Send case to Judge</h4>
+      <p>Select a judge to send case <span id="ltc-modal-case">#</span></p>
+      <form id="ltc-send-form" method="post" action="{{ url_for('lawyer.send_to_judge') }}">
+        <input type="hidden" name="case_ids" id="ltc-case-ids" value="">
+        <label for="ltc-judge-select">Judge</label>
+        <select id="ltc-judge-select" name="judge_id" required>
+          <option value="">-- choose judge --</option>
+          {% for j in judges %}
+            <option value="{{ j.id }}">{{ j.name or j.email }}</option>
+          {% endfor %}
+        </select>
+        <div class="actions">
+          <button type="button" id="ltc-cancel" class="button-secondary">Cancel</button>
+          <button type="submit" class="button-primary">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var modal = document.getElementById('ltc-share-modal');
+      var caseSpan = document.getElementById('ltc-modal-case');
+      var caseInput = document.getElementById('ltc-case-ids');
+      var cancelBtn = document.getElementById('ltc-cancel');
+
+      function openModalFor(caseId){
+        caseSpan.textContent = '#' + caseId;
+        caseInput.value = caseId;
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+        // focus judge select
+        var sel = document.getElementById('ltc-judge-select'); if(sel) sel.focus();
+      }
+
+      function closeModal(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+      }
+
+      document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.share-btn').forEach(function(b){
+          b.addEventListener('click', function(){ openModalFor(this.dataset.caseId); });
+        });
+        cancelBtn.addEventListener('click', function(e){ e.preventDefault(); closeModal(); });
+        // close when clicking overlay outside modal
+        modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+      });
+    })();
+  </script>
+{% endblock %}

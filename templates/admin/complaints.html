@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Complaints & Disputes{% endblock %}
+
+{% block content %}
+<h1>User Complaints</h1>
+
+<div class="complaints-list">
+    {% for complaint in complaints %}
+    <div class="card complaint-card">
+        <div class="complaint-header">
+            <h3>Complaint #{{ complaint.id }}</h3>
+            <span class="badge badge-{{ complaint.status }}">{{ complaint.status.title() }}</span>
+        </div>
+        <p><strong>From:</strong> {{ complaint.complainant.name }} ({{ complaint.complainant.role.title() }})</p>
+        <p><strong>About:</strong> {{ complaint.about_user.name }} ({{ complaint.about_user.role.title() }})</p>
+        <p><strong>Subject:</strong> {{ complaint.subject }}</p>
+        <p>{{ complaint.message }}</p>
+        <div class="complaint-actions">
+            <a href="{{ url_for('admin.view_complaint', complaint_id=complaint.id) }}" class="button-primary">Investigate</a>
+            {% if complaint.status == 'open' %}
+                <a href="#" class="button-success">Mark as Resolved</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Case History - Case #{{ case.id }}</h2>
+<p>{{ case.description }}</p>
+<hr />
+<h3>History Entries</h3>
+{% if histories %}
+  <ul>
+  {% for h in histories %}
+    <li>
+      <strong>{{ h.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong> —
+      <em>{{ h.action }}</em>
+      {% if h.actor %} by {{ h.actor.name or h.actor.email }}{% endif %}
+      {% if h.details %}
+        <div>{{ h.details }}</div>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No history entries yet.</p>
+{% endif %}
+
+{% if current_user.is_authenticated and current_user.role == 'lawyer' and case.lawyer_id == current_user.id %}
+<hr />
+<h3>Add History Entry</h3>
+<form method="post">
+  <div>
+    <label for="action">Action (short)</label>
+    <input id="action" name="action" placeholder="e.g., status_changed, note" />
+  </div>
+  <div>
+    <label for="details">Details</label>
+    <textarea id="details" name="details" rows="4" cols="60"></textarea>
+  </div>
+  <button type="submit">Add Entry</button>
+</form>
+{% endif %}
+
+<a href="{{ url_for('lawyer.view_case_details', case_id=case.id) }}">Back to Case</a>
+{% endblock %}

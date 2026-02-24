@@ -1,0 +1,1056 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Case Details Container */
+    .case-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+    }
+
+    .case-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+
+    /* Case Card */
+    .case-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .case-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .case-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .case-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    /* Case Header */
+    .case-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .case-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23ffffff" fill-opacity="0.1" width="100" height="100"/></svg>');
+        background-size: 20px 20px;
+        animation: patternMove 20s linear infinite;
+    }
+
+    @keyframes patternMove {
+        0% { background-position: 0 0; }
+        100% { background-position: 20px 20px; }
+    }
+
+    .case-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--white);
+        position: relative;
+        z-index: 1;
+    }
+
+    .case-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-open {
+        background: rgba(72, 187, 120, 0.2);
+        color: var(--success-color);
+    }
+
+    .status-in-progress {
+        background: rgba(66, 153, 225, 0.2);
+        color: var(--secondary-color);
+    }
+
+    .status-closed {
+        background: rgba(113, 128, 150, 0.2);
+        color: var(--text-secondary);
+    }
+
+    .status-pending {
+        background: rgba(237, 137, 54, 0.2);
+        color: var(--warning-color);
+    }
+
+    /* Case Content */
+    .case-content {
+        padding: 2rem;
+    }
+
+    .case-description {
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .case-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .meta-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .meta-label::before {
+        content: '';
+        width: 16px;
+        height: 16px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .meta-value {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* Case Actions */
+    .case-actions {
+        padding: 1.5rem;
+        background: var(--light-bg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .action-btn {
+        background: var(--white);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--secondary-color);
+    }
+
+    .action-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+    }
+
+    .action-btn.primary:hover {
+        box-shadow: var(--shadow-xl);
+    }
+
+    .action-btn::after {
+        font-size: 1.2rem;
+    }
+
+    .action-btn:nth-child(1)::after { content: "👁"; }
+    .action-btn:nth-child(2)::after { content: "💬"; }
+    .action-btn:nth-child(3)::after { content: "📅"; }
+
+    /* Communication Section */
+    .communication-section {
+        margin-top: 2rem;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23ffffff" fill-opacity="0.1" width="100" height="100"/></svg>');
+        background-size: 20px 20px;
+        animation: patternMove 20s linear infinite;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    /* Messages */
+    .messages-container {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .message-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .message-item {
+        background: var(--light-bg);
+        border-radius: 12px;
+        padding: 1rem;
+        transition: var(--transition);
+        position: relative;
+        animation: fadeInUp 1.4s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .message-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .message-timestamp {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .message-content {
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin-bottom: 0.75rem;
+    }
+
+    .message-form {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .message-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--white);
+    }
+
+    .message-input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+    }
+
+    .send-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .send-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .send-btn:hover::before {
+        left: 100%;
+    }
+
+    .send-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .send-btn::after {
+        font-size: 1.2rem;
+    }
+
+    /* Documents Section */
+    .documents-section {
+        margin-top: 2rem;
+        animation: fadeInUp 1.4s ease-out;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .document-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .document-item {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .document-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .document-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .document-icon::before {
+        content: "📄";
+    }
+
+    .document-info {
+        flex: 1;
+    }
+
+    .document-name {
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .document-meta {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .document-date {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .document-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        background: var(--white);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(66, 153, 225, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--secondary-color);
+    }
+
+    .action-btn::after {
+        font-size: 1.2rem;
+    }
+
+    /* Timeline Section */
+    .timeline-section {
+        margin-top: 2rem;
+        animation: fadeInUp 1.6s ease-out;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+    
+
+    .timeline::after {
+        content: '';
+        position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+    
+
+    .timeline-item {
+        position: relative;
+        padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        animation: fadeInUp 1.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+
+    .timeline-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--primary-color);
+        }
+
+    .timeline-dot {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: var(--white);
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+    .timeline-content {
+            position: relative;
+            padding: 1rem 0 0 0 2rem;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+    .timeline-date {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+    .timeline-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+    .timeline-description {
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .case-container {
+            margin: 0 1rem;
+        }
+
+        .case-card {
+            padding: 1rem;
+        }
+
+        .case-header {
+            padding: 1rem;
+        }
+
+        .case-content {
+            padding: 1rem;
+        }
+
+        .case-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .case-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Case Details</h1>
+        <p>Track and manage your legal case</p>
+    </div>
+</div>
+
+<!-- Case Container -->
+<div class="case-container">
+    <!-- Case Card -->
+    <div class="case-card">
+        <!-- Case Header -->
+        <div class="case-header">
+            <div class="case-title">
+                Case #{{ case.id }}
+                <span class="case-status {{ case.status }}">{{ case.status.title() }}</span>
+            </div>
+        </div>
+        
+        <!-- Case Content -->
+        <div class="case-content">
+            <div class="case-description">
+                {{ case.description }}
+            </div>
+            
+            <div class="case-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Category</span>
+                    <span class="meta-value">{{ case.category }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span class="meta-value">{{ case.status.title() }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Created</span>
+                    <span class="meta-value">{{ case.timestamp.strftime('%Y-%m-%d') }}</span>
+                </div>
+                {% if case.lawyer %}
+                <div class="meta-item">
+                    <span class="meta-label">Assigned Lawyer</span>
+                    <span class="meta-value">{{ case.lawyer.name }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Case Actions -->
+        <div class="case-actions">
+            <a href="{{ url_for('client.submit_case', case_id=case.id) }}" class="action-btn primary">Edit Case</a>
+            <a href="{{ url_for('lawyer.close_case', case_id=case.id) }}" class="action-btn">Close Case</a>
+        </div>
+    </div>
+</div>
+
+<!-- Communication Section -->
+<div class="communication-section">
+    <!-- Messages -->
+    <div class="messages-container">
+        <div class="section-header">
+            <div class="section-title">
+                Messages
+                <span class="section-title::before"></span>
+            </div>
+        </div>
+        
+        <div class="message-list">
+            {% for message in messages %}
+            <div class="message-item">
+                <div class="message-header">
+                    <span class="message-sender">{{ message.sender.name }}</span>
+                    <span class="message-timestamp">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="message-content">
+                    {{ message.content }}
+                </div>
+                <div class="message-form">
+                    <input type="text" class="message-input" placeholder="Type your message...">
+                    <button type="submit" class="send-btn">
+                        <span class="send-btn::after"></span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Documents Section -->
+    <div class="documents-section">
+        <div class="section-header">
+            <div class="section-title">
+                Documents
+                <span class="section-title::before"></span>
+            </div>
+        </div>
+        
+        <div class="document-list">
+            {% for document in case.documents %}
+            <div class="document-item">
+                <div class="document-icon"></div>
+                <div class="document-info">
+                    <div class="document-name">{{ document.original_filename }}</div>
+                    <div class="document-date">{{ document.timestamp.strftime('%Y-%m-%d') }}</div>
+                </div>
+                <div class="document-actions">
+                    <a href="{{ url_for('client.download_document', doc_id=document.id) }}" class="action-btn">Download</a>
+                    <a href="{{ url_for('client.view_document', doc_id=document.id) }}" class="action-btn">View</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Timeline Section -->
+    <div class="timeline-section">
+        <div class="section-header">
+            <div class="section-title">
+                Timeline
+                <span class="section-title::before"></span>
+            </div>
+        </div>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Case Created</div>
+                    <div class="timeline-title">Case #{{ case.id }} Created</div>
+                    <div class="timeline-description">{{ case.description[:100] }}...</div>
+                </div>
+            </div>
+            
+            {% if case.status != 'open' %}
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">{{ case.status_changed_date.strftime('%Y-%m-%d') }}</div>
+                    <div class="timeline-title">Status Changed to {{ case.status }}</div>
+                    <div class="timeline-description">{{ case.status_change_reason or 'Status updated' }}</div>
+                </div>
+            {% endif %}
+            
+            {% if case.lawyer %}
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">{{ case.lawyer_assigned_date.strftime('%Y-%m-%d') }}</div>
+                    <div class="timeline-title">Lawyer Assigned</div>
+                    <div class="timeline-description">{{ case.lawyer.name }} assigned to your case</div>
+                </div>
+            {% endif %}
+            
+            {% if case.status == 'closed' %}
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">{{ case.closed_date.strftime('%Y-%m-%d') }}</div>
+                    <div class="timeline-title">Case Closed</div>
+                    <div class="timeline-description">{{ case.closure_reason or 'Case closed' }}</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.case-card, .message-item, .document-item, .timeline-item').forEach((item, index) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    item.style.transitionDelay = `${index * 0.1}s`;
+    observer.observe(item);
+});
+
+// Add hover effects to action buttons
+document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-3px) scale(1.02)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Add click animation to send button
+document.querySelector('.send-btn').addEventListener('click', function() {
+    this.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        this.style.transform = 'scale(1)';
+    }, 200);
+});
+
+// Add click animation to document actions
+document.querySelectorAll('.document-actions .action-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.style.transform = 'scale(0.95)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+});
+
+// Add click animation to case actions
+document.querySelectorAll('.case-actions .action-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.style.transform = 'scale(0.95)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+});
+
+// Add click animation to timeline items
+document.querySelectorAll('.timeline-item').forEach((item, index) => {
+    item.addEventListener('click', function() {
+        this.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 200);
+    });
+    
+    item.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.05)';
+    });
+    
+    item.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+});
+</script>
+{% endblock %}

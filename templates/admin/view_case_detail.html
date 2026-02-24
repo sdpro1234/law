@@ -1,0 +1,719 @@
+{% extends "base.html" %}
+{% block title %}Case Details - Admin{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --info-color: #4299e1;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .case-details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        margin: 2rem 0 1.5rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    h2::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    /* Case Info Card */
+    .case-info-card {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .case-info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .case-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .case-title {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .case-title::before {
+        content: '📁';
+        font-size: 1.5rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        animation: pulse 2s infinite;
+    }
+
+    .status-open {
+        background: linear-gradient(135deg, var(--warning-color), #dd6b20);
+        color: var(--white);
+    }
+
+    .status-closed {
+        background: linear-gradient(135deg, var(--success-color), #38a169);
+        color: var(--white);
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, var(--info-color), #3182ce);
+        color: var(--white);
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(49, 130, 206, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(49, 130, 206, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(49, 130, 206, 0); }
+    }
+
+    .case-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .case-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .detail-item {
+        background: var(--light-bg);
+        padding: 1rem;
+        border-radius: 12px;
+        transition: var(--transition);
+    }
+
+    .detail-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .detail-item strong {
+        color: var(--primary-color);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Case Actions */
+    .case-actions {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem 0;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .button-primary,
+    .button-secondary {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .button-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-primary:hover::before {
+        left: 100%;
+    }
+
+    .button-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+    }
+
+    .button-primary::after {
+        content: '⚙️';
+        font-size: 0.9rem;
+    }
+
+    .button-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .button-secondary:hover {
+        background: var(--primary-color);
+        color: var(--white);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-secondary::after {
+        content: '←';
+        font-size: 0.9rem;
+    }
+
+    /* Messages Section */
+    .messages-list {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .message-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .message-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .message-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .message-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .message-content {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .message-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .message-time {
+        font-style: italic;
+    }
+
+    /* Documents Section */
+    .documents-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        animation: fadeInUp 0.8s ease-out 0.8s both;
+    }
+
+    .document-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .document-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--accent-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .document-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .document-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .document-info {
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+
+    .document-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .document-name::before {
+        content: '📄';
+        font-size: 1.2rem;
+    }
+
+    .button-small {
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .button-small::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-small:hover::before {
+        left: 100%;
+    }
+
+    .button-small:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-small::after {
+        content: '⬇';
+        font-size: 0.8rem;
+    }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        animation: fadeIn 1s ease-out;
+    }
+
+    .empty-state::before {
+        content: '📭';
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .case-details-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .case-info-card {
+            padding: 1.5rem;
+        }
+
+        .case-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .case-actions {
+            flex-direction: column;
+        }
+
+        .button-primary,
+        .button-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .documents-list {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        .case-info-card {
+            padding: 1rem;
+        }
+
+        .case-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="case-details-container">
+    <h1>Case #{{ case.id }} Details</h1>
+    
+    <div class="case-info-card">
+        <div class="case-header">
+            <div class="case-title">{{ case.category }}</div>
+            <div class="status-badge status-{{ case.status }}">{{ case.status }}</div>
+        </div>
+        
+        <div class="case-description">{{ case.description }}</div>
+        
+        <div class="case-details">
+            <div class="detail-item">
+                <strong>Client</strong>
+                {{ case.client.name }} ({{ case.client.email }})
+            </div>
+            <div class="detail-item">
+                <strong>Lawyer</strong>
+                {{ case.lawyer.name if case.lawyer else 'Unassigned' }}
+            </div>
+            <div class="detail-item">
+                <strong>Submitted</strong>
+                {{ case.timestamp.strftime('%Y-%m-%d %H:%M') }}
+            </div>
+        </div>
+    </div>
+
+    <div class="case-actions">
+        {% if case.status == 'open' %}
+            <a href="{{ url_for('admin.view_cases') }}" class="button-secondary">Back to list</a>
+            <a href="{{ url_for('admin.view_cases') }}" class="button-primary">Assign/Manage</a>
+        {% else %}
+            <a href="{{ url_for('admin.view_cases') }}" class="button-secondary">Back to list</a>
+        {% endif %}
+    </div>
+
+    <h2>Related Messages</h2>
+    <div class="messages-list">
+        {% for msg in case.messages %}
+        <div class="message-card">
+            <div class="message-content">{{ msg.content }}</div>
+            <div class="message-meta">
+                <span class="message-sender">{{ msg.sender.name }}</span>
+                <span class="message-time">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            No messages found for this case.
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2>Documents</h2>
+    <div class="documents-list">
+        {% for doc in case.documents %}
+        <div class="document-card">
+            <div class="document-info">
+                <div class="document-name">{{ doc.original_filename }}</div>
+            </div>
+            <a href="/static/uploads/{{ doc.filename }}" class="button-small">Download</a>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            No documents found for this case.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Add interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate cards on hover
+        const cards = document.querySelectorAll('.message-card, .document-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+        
+        // Add ripple effect to buttons
+        const buttons = document.querySelectorAll('.button-primary, .button-secondary, .button-small');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        
+        // Animate detail items on hover
+        const detailItems = document.querySelectorAll('.detail-item');
+        detailItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    /* Make buttons relative for ripple effect */
+    .button-primary, .button-secondary, .button-small {
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

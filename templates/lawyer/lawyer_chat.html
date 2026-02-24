@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+{% block title %}Lawyer Chat{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --message-sent: #e3f2fd;
+        --message-received: #f3e5f5;
+        --message-sent-text: #1565c0;
+        --message-received-text: #6a1b9a;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+    }
+
+    .chat-container {
+        max-width: 900px;
+        margin: 0 auto;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        text-align: center;
+        position: relative;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    .card {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out;
+        position: relative;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .chat-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .chat-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320,768,320,576,320,480,320,384,320,288,320,192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+        opacity: 0.3;
+    }
+
+    .avatar-container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        transition: var(--transition);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+
+    .avatar:hover {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .chat-info {
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+
+    .chat-info strong {
+        font-size: 1.2rem;
+        display: block;
+        margin-bottom: 0.25rem;
+        animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    .chat-info .muted {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        background-color: var(--success-color);
+        border-radius: 50%;
+        position: relative;
+        z-index: 1;
+        animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        margin: 0;
+    }
+
+    .messages-list {
+        max-height: 420px;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: linear-gradient(180deg, #fafafa, #f0f0f0);
+        position: relative;
+    }
+
+    .messages-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .messages-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .messages-list::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+
+    .messages-list::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+
+    .message {
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.5s ease-out;
+        position: relative;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .message-time::before {
+        content: '•';
+        color: var(--border-color);
+    }
+
+    .message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        display: inline-block;
+        max-width: 70%;
+        position: relative;
+        transition: var(--transition);
+        animation: slideIn 0.5s ease-out;
+    }
+
+    .message-bubble:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .message-sent {
+        background: linear-gradient(135deg, var(--message-sent), #bbdefb);
+        color: var(--message-sent-text);
+        margin-left: auto;
+        display: block;
+        text-align: right;
+    }
+
+    .message-sent::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: -8px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid var(--message-sent);
+        border-bottom: 10px solid transparent;
+    }
+
+    .message-received {
+        background: linear-gradient(135deg, var(--message-received), #e1bee7);
+        color: var(--message-received-text);
+    }
+
+    .message-received::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: -8px;
+        width: 0;
+        height: 0;
+        border-right: 10px solid var(--message-received);
+        border-bottom: 10px solid transparent;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        animation: fadeIn 1s ease-out;
+    }
+
+    .empty-state::before {
+        content: '💬';
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .message-form {
+        padding: 1.5rem;
+        background: var(--white);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        position: relative;
+    }
+
+    .message-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    }
+
+    .message-input {
+        flex: 1;
+        min-height: 50px;
+        max-height: 120px;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 25px;
+        font-family: inherit;
+        font-size: 1rem;
+        resize: none;
+        transition: var(--transition);
+        background: var(--light-bg);
+    }
+
+    .message-input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        background: var(--white);
+    }
+
+    .send-button {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .send-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .send-button:hover::before {
+        left: 100%;
+    }
+
+    .send-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .send-button:active {
+        transform: translateY(0);
+    }
+
+    .send-button::after {
+        content: '➤';
+        font-size: 0.8rem;
+        transition: var(--transition);
+    }
+
+    .send-button:hover::after {
+        transform: translateX(2px);
+    }
+
+    .invalid-conversation {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        animation: fadeIn 1s ease-out;
+    }
+
+    .invalid-conversation::before {
+        content: '⚠️';
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .chat-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .message-bubble {
+            max-width: 85%;
+        }
+
+        .message-form {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message-input {
+            width: 100%;
+        }
+
+        .send-button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="chat-container">
+    <h1>Messages</h1>
+    
+    <div class="card">
+        {% if other_party %}
+            <div class="chat-header">
+                <div class="avatar-container">
+                    <img src="{{ ('/' + other_party.profile_pic) if other_party.profile_pic else url_for('static', filename='images/default_avatar.svg') }}" alt="avatar" class="avatar">
+                </div>
+                <div class="chat-info">
+                    <strong>{{ other_party.name or other_party.email }}</strong>
+                    <div class="muted">Client</div>
+                </div>
+                <div class="status-indicator"></div>
+            </div>
+            
+            <hr class="divider"/>
+            
+            <div class="messages-list">
+                {% for m in messages %}
+                    <div class="message">
+                        <div class="message-time">{{ m.timestamp.strftime('%Y-%m-%d %H:%M') }} • {% if m.sender_id == current_user.id %}You{% else %}{{ other_party.name or 'Client' }}{% endif %}</div>
+                        <div class="message-bubble {% if m.sender_id == current_user.id %}message-sent{% else %}message-received{% endif %}">
+                            {{ m.content }}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        No messages yet. Start the conversation!
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <form method="post" action="{{ url_for('lawyer.send_message', case_id=case.id) }}" class="message-form">
+                <textarea name="content" placeholder="Type your message..." class="message-input" required></textarea>
+                <button type="submit" class="send-button">Send</button>
+            </form>
+        {% else %}
+            <div class="invalid-conversation">
+                Invalid conversation.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Auto-scroll to bottom of messages
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesList = document.querySelector('.messages-list');
+        if (messagesList) {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+        
+        // Add typing animation to textarea
+        const messageInput = document.querySelector('.message-input');
+        if (messageInput) {
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+    });
+</script>
+{% endblock %}

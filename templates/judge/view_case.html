@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Case {{ case.id }}{% endblock %}
+{% block content %}
+<style>
+/* Premium/internal styles for judge case view */
+.premium-container{max-width:1100px;margin:18px auto;padding:28px;background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);border-radius:12px;box-shadow:0 8px 30px rgba(19,24,32,0.06);border:1px solid rgba(20,30,60,0.03);animation:fadeIn 420ms ease-out}
+.case-title{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;font-weight:700;color:#0b2a4a;margin-bottom:6px}
+.muted{color:#667085;font-weight:600}
+.meta-row{margin:6px 0;color:#475569}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#e6eef9,transparent);margin:14px 0}
+.button-primary{background:linear-gradient(90deg,#1460f0,#0a84ff);color:#fff;padding:10px 16px;border-radius:8px;border:none;box-shadow:0 6px 18px rgba(10,132,255,0.18);cursor:pointer;transition:transform .12s ease,box-shadow .12s}
+.button-primary:hover{transform:translateY(-2px)}
+.button-secondary{background:#eef2ff;color:#0b2a4a;padding:10px 14px;border-radius:8px;border:1px solid rgba(11,42,74,0.06);cursor:pointer}
+.btn-analyst{background:linear-gradient(90deg,#6b21a8,#8b5cf6);color:#fff;padding:10px 16px;border-radius:10px;border:none;box-shadow:0 8px 26px rgba(139,92,246,0.18);transition:transform .14s ease;display:inline-flex;align-items:center;gap:10px}
+.btn-analyst:hover{transform:translateY(-3px) scale(1.01)}
+.analyst-panel{margin-top:12px;padding:14px;border-radius:10px;background:linear-gradient(180deg,#fbfdff,#ffffff);border:1px solid rgba(14,35,78,0.04);box-shadow:0 6px 20px rgba(16,24,40,0.04);min-height:48px}
+.spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,0.25);border-top-color:#fff;display:inline-block;animation:spin 900ms linear infinite;vertical-align:middle;margin-right:8px}
+.loading{display:flex;align-items:center;color:#0b2a4a}
+.recommendation-list li{margin:8px 0;padding:8px;border-radius:8px;background:linear-gradient(90deg,#ffffff,#fbfbff);transition:transform .18s ease,opacity .2s;opacity:0;transform:translateY(8px)}
+.recommendation-list li.show{opacity:1;transform:none}
+.error-panel{background:#fff1f0;border:1px solid #ffa39e;padding:12px;border-radius:8px;color:#7a2a2a;animation:popIn .18s ease}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes popIn{from{transform:scale(.98);opacity:0}to{transform:none;opacity:1}}
+  </style>
+
+  <div class="premium-container">
+  <h2 class="case-title">Case #{{ case.id }} - {{ case.category }}</h2>
+  <p class="meta-row"><strong class="muted">Status:</strong> {{ case.status }}</p>
+  <p class="meta-row"><strong class="muted">Client:</strong> {{ case.client.name or case.client.email }}</p>
+  {% if case.client2 %}
+    <p><strong>Primary Client:</strong> {{ case.client.name or case.client.email }}</p>
+    <p><strong>Primary Contact:</strong> {{ case.client.email }}{% if case.client.phone_number %} — {{ case.client.phone_number }}{% endif %}{% if case.client.address %} — {{ case.client.address }}{% endif %}</p>
+    <hr>
+    <p><strong>Secondary Client:</strong> {{ case.client2.name or case.client2.email }}</p>
+    <p><strong>Secondary Contact:</strong> {{ case.client2.email }}{% if case.client2.phone_number %} — {{ case.client2.phone_number }}{% endif %}{% if case.client2.address %} — {{ case.client2.address }}{% endif %}</p>
+  {% else %}
+    <p><strong>Client:</strong> {{ case.client.name or case.client.email }}</p>
+    <p><strong>Description:</strong> {{ case.description }}</p>
+  {% endif %}
+  <p class="meta-row"><strong class="muted">Jurisdiction Verified:</strong> {{ case.jurisdiction_verified }}</p>
+
+  <form method="post" action="{{ url_for('judge.verify_jurisdiction', case_id=case.id) }}">
+    {% if not case.jurisdiction_verified %}
+      <button class="button-primary" type="submit">Verify Jurisdiction & Assign to Me</button>
+    {% else %}
+      <em>Jurisdiction already verified</em>
+    {% endif %}
+  </form>
+  <div class="divider"></div>
+  <button id="analyst-btn" class="btn-analyst">Analyst</button>
+  <div id="analyst-report" class="analyst-panel" style="display:none;"></div>
+
+  <hr>
+  <h3>Schedule Hearing</h3>
+  <form method="post" action="{{ url_for('judge.schedule_hearing', case_id=case.id) }}">
+    <label>Scheduled At (ISO):</label><br>
+    <input id="scheduled_at" name="scheduled_at" placeholder="YYYY-MM-DDTHH:MM" required><br><br>
+    <label>Notes</label><br>
+    <textarea name="notes" rows="3"></textarea><br><br>
+    <button class="button-primary" type="submit">Schedule</button>
+  </form>
+
+<script>
+document.getElementById('analyst-btn').addEventListener('click', function(e){
+  var out = document.getElementById('analyst-report');
+  out.style.display = 'block';
+  out.innerHTML = '<div style="color:#1a73e8;">Generating AI report...</div>';
+  function showError(msg){
+    out.innerHTML = '<div style="background:#fff1f0; border:1px solid #ffa39e; padding:12px; border-radius:6px; color:#722c2c;">'
+      + '<strong>Error:</strong> ' + (msg || 'Error generating report.')
+      + '<div style="margin-top:8px;"><button id="analyst-retry" class="button-primary">Retry</button> <button id="analyst-dismiss" class="button-secondary">Dismiss</button></div>'
+      + '</div>';
+    document.getElementById('analyst-retry').addEventListener('click', function(){ document.getElementById('analyst-btn').click(); });
+    document.getElementById('analyst-dismiss').addEventListener('click', function(){ out.style.display = 'none'; });
+  }
+
+  fetch('{{ url_for('judge.ai_report', case_id=case.id) }}', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: ''
+  }).then(function(r){
+    return r.json().catch(function(){ throw new Error('Invalid response from server'); });
+  }).then(function(j){
+    if(!j.ok){ showError(j.error || 'AI service returned an error.'); return; }
+    var d = j.data || {};
+    var html = '';
+    if(d.partial){ html += '<div style="color:#b36b00; margin-bottom:8px;"><strong>Quick fallback result:</strong> AI service slow or unavailable — showing deterministic suggestions.</div>'; }
+    if(d.case_report){ html += '<h4>AI Case Report</h4><pre style="white-space:pre-wrap;">' + (d.case_report || '') + '</pre>'; }
+    if(d.recommendations){
+      html += '<h4>Recommendations</h4><ul>';
+      (d.recommendations||[]).forEach(function(r){
+        html += '<li><strong>' + (r.specialization||'') + '</strong>: ' + (r.reason||'') + '<br>';
+        if(r.details){ html += '<small style="color:#333;">' + (r.details||'') + '</small>'; }
+        html += '</li>';
+      });
+      html += '</ul>';
+    }
+    out.innerHTML = html || '<div>No report available.</div>';
+  }).catch(function(err){
+    console.error(err);
+    showError(err && err.message ? err.message : 'Error generating report.');
+  });
+});
+</script>
+
+<!-- Flatpickr date-time picker (loaded via CDN) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  try{
+    flatpickr('#scheduled_at', {
+      enableTime: true,
+      time_24hr: true,
+      dateFormat: "Y-m-d\TH:i",
+      altInput: true,
+      altFormat: "F j, Y (H:i)",
+      allowInput: true
+    });
+  }catch(e){
+    console.warn('Flatpickr init failed', e);
+  }
+</script>
+
+  <h3>Hearings</h3>
+  <ul>
+    {% for h in hearings %}
+      <li>{{ h.scheduled_at }} — {{ h.status }} — {{ h.notes }}</li>
+    {% else %}
+      <li>No hearings scheduled</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

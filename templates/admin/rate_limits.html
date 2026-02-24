@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+{% block title %}Rate Limit Events{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --info-color: #4299e1;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .rate-limit-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    /* Rate Limit Table */
+    .table-container {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        position: relative;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .table-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--danger-color), var(--warning-color), var(--info-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        position: relative;
+        z-index: 1;
+    }
+
+    thead {
+        background: linear-gradient(135deg, var(--danger-color), var(--warning-color));
+        color: var(--white);
+    }
+
+    th {
+        padding: 1.25rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        transition: var(--transition);
+    }
+
+    th:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition);
+        animation: fadeInUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    tbody tr:nth-child(2) { animation-delay: 0.2s; }
+    tbody tr:nth-child(3) { animation-delay: 0.3s; }
+    tbody tr:nth-child(4) { animation-delay: 0.4s; }
+    tbody tr:nth-child(5) { animation-delay: 0.5s; }
+    tbody tr:nth-child(6) { animation-delay: 0.6s; }
+    tbody tr:nth-child(7) { animation-delay: 0.7s; }
+    tbody tr:nth-child(8) { animation-delay: 0.8s; }
+    tbody tr:nth-child(9) { animation-delay: 0.9s; }
+    tbody tr:nth-child(10) { animation-delay: 1.0s; }
+
+    tbody tr:hover {
+        background: var(--light-bg);
+        transform: translateX(5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    td {
+        padding: 1rem;
+        font-size: 0.95rem;
+        position: relative;
+    }
+
+    /* Cell Styling */
+    .timestamp-cell {
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .timestamp-cell::before {
+        content: '⏰';
+        font-size: 1.1rem;
+    }
+
+    .ip-cell {
+        font-family: monospace;
+        background: var(--light-bg);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        display: inline-block;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .session-cell {
+        font-family: monospace;
+        background: var(--light-bg);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        position: relative;
+    }
+
+    .session-cell::after {
+        content: '🔑';
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        opacity: 0.5;
+    }
+
+    .endpoint-cell {
+        font-weight: 500;
+        color: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .endpoint-cell::before {
+        content: '🔗';
+        font-size: 1rem;
+    }
+
+    .referer-cell {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        max-width: 240px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        position: relative;
+    }
+
+    .referer-cell::after {
+        content: '🌐';
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        opacity: 0.5;
+    }
+
+    .user-agent-cell {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        max-width: 360px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        position: relative;
+    }
+
+    .user-agent-cell::after {
+        content: '🖥️';
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        opacity: 0.5;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        animation: fadeIn 1s ease-out;
+    }
+
+    .empty-state::before {
+        content: '🚫';
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .rate-limit-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .table {
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            min-width: 800px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        th, td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .ip-cell, .session-cell, .referer-cell, .user-agent-cell {
+            max-width: 120px;
+        }
+    }
+</style>
+
+<div class="rate-limit-container">
+    <h1>Recent Rate-Limited Events</h1>
+    
+    <div class="table-container">
+        {% if logs %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>IP</th>
+                    <th>Session</th>
+                    <th>Endpoint</th>
+                    <th>Referer</th>
+                    <th>User-Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in logs %}
+                <tr>
+                    <td class="timestamp-cell">{{ e.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="ip-cell">{{ e.ip_address or '-' }}</td>
+                    <td class="session-cell">{{ e.session_cookie or '-' }}</td>
+                    <td class="endpoint-cell">{{ e.endpoint }}</td>
+                    <td class="referer-cell">{{ e.referer or '-' }}</td>
+                    <td class="user-agent-cell">{{ e.user_agent or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            No rate-limited events recorded.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Add interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate table rows on hover
+        const tableRows = document.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px) scale(1.01)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+        
+        // Add sorting functionality (visual only)
+        const tableHeaders = document.querySelectorAll('th');
+        tableHeaders.forEach(header => {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function() {
+                // Add a subtle animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+        
+        // Add click-to-expand functionality for cells with truncated content
+        const truncatedCells = document.querySelectorAll('.session-cell, .referer-cell, .user-agent-cell');
+        truncatedCells.forEach(cell => {
+            cell.style.cursor = 'pointer';
+            cell.addEventListener('click', function() {
+                if (this.style.whiteSpace === 'nowrap') {
+                    this.style.whiteSpace = 'normal';
+                    this.style.maxWidth = 'none';
+                    this.style.overflow = 'visible';
+                    this.style.textOverflow = 'initial';
+                } else {
+                    this.style.whiteSpace = 'nowrap';
+                    this.style.overflow = 'hidden';
+                    this.style.textOverflow = 'ellipsis';
+                    // Reset max-width based on cell type
+                    if (this.classList.contains('session-cell')) {
+                        this.style.maxWidth = '200px';
+                    } else if (this.classList.contains('referer-cell')) {
+                        this.style.maxWidth = '240px';
+                    } else if (this.classList.contains('user-agent-cell')) {
+                        this.style.maxWidth = '360px';
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

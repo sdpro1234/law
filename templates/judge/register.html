@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Judge Registration{% endblock %}
+{% block content %}
+<div style="max-width:700px;margin:40px auto;padding:20px;background:#fff;border-radius:8px;">
+  <h2>Judge Registration</h2>
+  <form method="post" enctype="multipart/form-data">
+    <label>Name</label><br>
+    <input name="name" required><br><br>
+    <label>Email</label><br>
+    <input name="email" type="email" required><br><br>
+    <label>Password</label><br>
+    <input name="password" type="password" required><br><br>
+    <label>Court Name</label><br>
+    <input name="court_name" type="text"><br><br>
+    <label>Judge ID Number</label><br>
+    <input name="judge_id_number" type="text"><br><br>
+    <label>Verification Document (optional)</label><br>
+    <input name="verification_document" type="file" accept=".pdf,.jpg,.png"><br><br>
+    <button class="button-primary" type="submit">Register</button>
+  </form>
+</div>
+{% endblock %}

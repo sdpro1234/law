@@ -1,0 +1,959 @@
+{% extends "base.html" %}
+{% block title %}Book a Consultation{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Booking Container */
+    .booking-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 1s ease-out;
+    }
+
+    /* Lawyer Profile Card */
+    .lawyer-profile-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        animation: slideRight 0.8s ease-out;
+        height: fit-content;
+    }
+
+    .lawyer-profile-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .lawyer-profile-header::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 30px;
+        background: var(--white);
+        border-radius: 50%;
+        box-shadow: var(--shadow-md);
+    }
+
+    .lawyer-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid var(--white);
+        margin: 0 auto 1rem;
+        object-fit: cover;
+        box-shadow: var(--shadow-lg);
+        animation: pulse 2s infinite;
+    }
+
+    .lawyer-name {
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .lawyer-specialization {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+    }
+
+    .lawyer-profile-body {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .lawyer-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .lawyer-details {
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .detail-item::before {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .detail-item.experience::before { content: "📅"; }
+    .detail-item.location::before { content: "📍"; }
+    .detail-item.languages::before { content: "🌐"; }
+    .detail-item.rating::before { content: "⭐"; }
+
+    .verification-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(72, 187, 120, 0.1);
+        color: var(--success-color);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Booking Form */
+    .booking-form-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        animation: slideLeft 0.8s ease-out;
+    }
+
+    .booking-form-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .booking-form-header h2 {
+        font-size: 1.75rem;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .booking-form-header p {
+        color: var(--text-secondary);
+    }
+
+    /* Form Elements */
+    .booking-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        position: relative;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-group input[type="date"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background-color: var(--white);
+    }
+
+    .form-group input[type="date"]:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Time Slots Grid */
+    .time-slots-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .time-slot {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .time-slot input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .time-slot label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem;
+        background: var(--light-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-weight: 500;
+        text-align: center;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .time-slot input[type="radio"]:checked + label {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border-color: var(--secondary-color);
+        transform: scale(1.05);
+        box-shadow: var(--shadow-md);
+    }
+
+    .time-slot label:hover {
+        border-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Consultation Type Options */
+    .consultation-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .consultation-option {
+        position: relative;
+    }
+
+    .consultation-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .consultation-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 0.5rem;
+        background: var(--light-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-weight: 500;
+        text-align: center;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .consultation-option label::before {
+        content: '';
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .consultation-option.video label::before { content: "📹"; }
+    .consultation-option.phone label::before { content: "📞"; }
+    .consultation-option.in-person label::before { content: "👥"; }
+
+    .consultation-option input[type="radio"]:checked + label {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border-color: var(--secondary-color);
+        transform: scale(1.05);
+        box-shadow: var(--shadow-md);
+    }
+
+    .consultation-option label:hover {
+        border-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        margin-top: 1rem;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Success Message */
+    .success-message {
+        background-color: rgba(72, 187, 120, 0.1);
+        border-left: 4px solid var(--success-color);
+        color: var(--success-color);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: slideDown 0.5s ease-out;
+        display: none;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+
+    /* Error Message */
+    .error-message {
+        background-color: rgba(245, 101, 101, 0.1);
+        border-left: 4px solid var(--danger-color);
+        color: var(--danger-color);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: shake 0.5s ease-in-out;
+        display: none;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .submit-btn.loading .btn-text {
+        display: none;
+    }
+
+    .submit-btn.loading .spinner {
+        display: block;
+    }
+
+    /* Calendar Widget */
+    .calendar-widget {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        padding: 1.5rem;
+        margin-top: 2rem;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .calendar-nav button {
+        background: var(--light-bg);
+        border: none;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .calendar-nav button:hover {
+        background: var(--secondary-color);
+        color: var(--white);
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+    }
+
+    .calendar-day-header {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-secondary);
+        padding: 0.5rem 0;
+        font-size: 0.85rem;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .calendar-day:hover {
+        background: var(--light-bg);
+    }
+
+    .calendar-day.today {
+        background: rgba(66, 153, 225, 0.1);
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+
+    .calendar-day.selected {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .calendar-day.disabled {
+        color: var(--text-secondary);
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .calendar-day.disabled:hover {
+        background: transparent;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideLeft {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .booking-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .time-slots-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .consultation-options {
+            grid-template-columns: 1fr;
+        }
+
+        .booking-form-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Book a Consultation with {{ lawyer.name }}</h1>
+        <p>Select a date and time that works for you. The lawyer will receive a request and confirm the appointment.</p>
+    </div>
+</div>
+
+<!-- Booking Container -->
+<div class="booking-container">
+    <!-- Lawyer Profile Card -->
+    <div class="lawyer-profile-card">
+        <div class="lawyer-profile-header">
+            <img src="{{ ('/' + lawyer.profile_pic) if lawyer.profile_pic else url_for('static', filename='images/default_avatar.svg') }}" alt="{{ lawyer.name }}" class="lawyer-avatar">
+            <h2 class="lawyer-name">{{ lawyer.name }}</h2>
+            <p class="lawyer-specialization">{{ lawyer.specialization or 'General Practice' }}</p>
+        </div>
+        <div class="lawyer-profile-body">
+            <div class="lawyer-stats">
+                <div class="stat-item">
+                    <span class="stat-value">{{ lawyer.experience_years or 0 }}</span>
+                    <span class="stat-label">Years Exp.</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">4.8</span>
+                    <span class="stat-label">Rating</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">127</span>
+                    <span class="stat-label">Cases</span>
+                </div>
+            </div>
+            <div class="lawyer-details">
+                <div class="detail-item experience">{{ lawyer.experience_years or 0 }} years of experience</div>
+                <div class="detail-item location">{{ lawyer.location or 'Location not specified' }}</div>
+                <div class="detail-item languages">English, Spanish</div>
+                <div class="detail-item rating">4.8 out of 5 stars (127 reviews)</div>
+            </div>
+            {% if lawyer.is_verified %}
+            <div class="verification-badge">
+                <span>✓</span>
+                <span>Verified Lawyer</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Booking Form Card -->
+    <div class="booking-form-card">
+        <div class="booking-form-header">
+            <h2>Schedule Your Consultation</h2>
+            <p>Fill in the details below to request an appointment</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Your appointment request has been submitted successfully! The lawyer will review and confirm your booking.
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            There was an error submitting your request. Please try again.
+        </div>
+
+        <form action="{{ url_for('client.booking_page', lawyer_id=lawyer.id, case_id=case.id) }}" method="POST" class="booking-form" id="bookingForm">
+            <input type="hidden" name="lawyer_id" value="{{ lawyer.id }}">
+            <input type="hidden" name="case_id" value="{{ case.id }}">
+            
+            <div class="form-group">
+                <label for="date">Select Date</label>
+                <input type="date" name="date" id="date" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Available Time Slots</label>
+                <div class="time-slots-grid">
+                    <div class="time-slot">
+                        <input type="radio" name="time" value="09:00" id="time-0900" required>
+                        <label for="time-0900">9:00 AM</label>
+                    </div>
+                    <div class="time-slot">
+                        <input type="radio" name="time" value="10:00" id="time-1000">
+                        <label for="time-1000">10:00 AM</label>
+                    </div>
+                    <div class="time-slot">
+                        <input type="radio" name="time" value="11:00" id="time-1100">
+                        <label for="time-1100">11:00 AM</label>
+                    </div>
+                    <div class="time-slot">
+                        <input type="radio" name="time" value="14:00" id="time-1400">
+                        <label for="time-1400">2:00 PM</label>
+                    </div>
+                    <div class="time-slot">
+                        <input type="radio" name="time" value="15:00" id="time-1500">
+                        <label for="time-1500">3:00 PM</label>
+                    </div>
+                    <div class="time-slot">
+                        <input type="radio" name="time" value="16:00" id="time-1600">
+                        <label for="time-1600">4:00 PM</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Consultation Type</label>
+                <div class="consultation-options">
+                    <div class="consultation-option video">
+                        <input type="radio" name="consultation_type" value="video" id="consultation-video" checked>
+                        <label for="consultation-video">Video Call</label>
+                    </div>
+                    <div class="consultation-option phone">
+                        <input type="radio" name="consultation_type" value="phone" id="consultation-phone">
+                        <label for="consultation-phone">Phone Call</label>
+                    </div>
+                    <div class="consultation-option in-person">
+                        <input type="radio" name="consultation_type" value="in-person" id="consultation-inperson">
+                        <label for="consultation-inperson">In-Person</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Additional Notes (Optional)</label>
+                <textarea name="notes" id="notes" rows="4" placeholder="Anything specific you'd like to discuss?"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-text">Request Appointment</span>
+                <div class="spinner"></div>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Calendar Widget -->
+<div class="calendar-widget">
+    <div class="calendar-header">
+        <h3>Quick Date Selection</h3>
+        <div class="calendar-nav">
+            <button id="prevMonth">&lt;</button>
+            <span id="currentMonth">June 2023</span>
+            <button id="nextMonth">&gt;</button>
+        </div>
+    </div>
+    <div class="calendar-grid" id="calendarGrid">
+        <!-- Calendar will be populated by JavaScript -->
+    </div>
+</div>
+
+<script>
+// Set minimum date to today
+document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+// Form submission with loading state
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    // Show loading state
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+    
+    // Simulate form submission
+    setTimeout(() => {
+        // Reset loading state
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        
+        // Show success message (in a real app, this would be based on the server response)
+        successMessage.classList.add('show');
+        
+        // Scroll to top of form
+        this.scrollIntoView({ behavior: 'smooth' });
+        
+        // Hide message after 5 seconds
+        setTimeout(() => {
+            successMessage.classList.remove('show');
+        }, 5000);
+    }, 2000);
+});
+
+// Calendar functionality
+const calendarGrid = document.getElementById('calendarGrid');
+const currentMonthElement = document.getElementById('currentMonth');
+const prevMonthBtn = document.getElementById('prevMonth');
+const nextMonthBtn = document.getElementById('nextMonth');
+
+let currentDate = new Date();
+let selectedDate = null;
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Update month display
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    currentMonthElement.textContent = `${monthNames[month]} ${year}`;
+    
+    // Clear calendar
+    calendarGrid.innerHTML = '';
+    
+    // Add day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendarGrid.appendChild(dayHeader);
+    });
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        calendarGrid.appendChild(emptyDay);
+    }
+    
+    // Add days of month
+    const today = new Date();
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = i;
+        
+        // Check if day is today
+        if (year === today.getFullYear() && 
+            month === today.getMonth() && 
+            i === today.getDate()) {
+            dayElement.classList.add('today');
+        }
+        
+        // Check if day is in the past
+        const dayDate = new Date(year, month, i);
+        if (dayDate < today && !(year === today.getFullYear() && 
+            month === today.getMonth() && 
+            i === today.getDate())) {
+            dayElement.classList.add('disabled');
+        } else {
+            // Add click event to select date
+            dayElement.addEventListener('click', function() {
+                // Remove previous selection
+                document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Add selection to clicked day
+                this.classList.add('selected');
+                
+                // Update date input
+                const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                document.getElementById('date').value = formattedDate;
+                selectedDate = new Date(year, month, i);
+            });
+        }
+        
+        calendarGrid.appendChild(dayElement);
+    }
+}
+
+// Initialize calendar
+renderCalendar();
+
+// Navigation buttons
+prevMonthBtn.addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+});
+
+nextMonthBtn.addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.form-group').forEach(item => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(item);
+});
+</script>
+{% endblock %}

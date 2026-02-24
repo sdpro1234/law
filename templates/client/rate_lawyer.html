@@ -1,0 +1,584 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Rating Container */
+    .rating-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    /* Case Info */
+    .case-info {
+        background: linear-gradient(135deg, var(--light-bg), rgba(66, 153, 225, 0.05));
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 80px;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        flex: 1;
+    }
+
+    /* Rating Form */
+    .rating-form {
+        padding: 3rem;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Star Rating */
+    .star-rating {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .star {
+        font-size: 3rem;
+        color: var(--border-color);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .star::before {
+        content: "★";
+        display: block;
+    }
+
+    .star:hover {
+        color: var(--warning-color);
+        transform: scale(1.1);
+    }
+
+    .star.active {
+        color: var(--warning-color);
+        animation: starPop 0.3s ease-out;
+    }
+
+    @keyframes starPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
+    .star.filled {
+        color: var(--warning-color);
+        text-shadow: 0 0 10px rgba(237, 137, 54, 0.3);
+    }
+
+    /* Hidden Number Input */
+    .rating-input {
+        display: none;
+    }
+
+    /* Textarea */
+    .form-group textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: var(--transition);
+        background-color: var(--white);
+    }
+
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-group textarea::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    /* Character Count */
+    .char-count {
+        text-align: right;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        transition: var(--transition);
+    }
+
+    .char-count.warning {
+        color: var(--warning-color);
+    }
+
+    .char-count.error {
+        color: var(--danger-color);
+    }
+
+    /* Submit Button */
+    .submit-section {
+        text-align: center;
+        padding: 2rem;
+        background: var(--light-bg);
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 3rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn::after {
+        content: "⭐";
+        font-size: 1.2rem;
+    }
+
+    /* Success Message */
+    .success-message {
+        background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(72, 187, 120, 0.05));
+        border-left: 4px solid var(--success-color);
+        color: var(--success-color);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        animation: slideDown 0.5s ease-out;
+        display: none;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+
+    /* Rating Preview */
+    .rating-preview {
+        text-align: center;
+        padding: 1rem;
+        background: var(--white);
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        display: none;
+    }
+
+    .rating-preview.show {
+        display: block;
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    .preview-text {
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .preview-stars {
+        font-size: 2rem;
+        color: var(--warning-color);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .rating-container {
+            margin: 0 1rem;
+            border-radius: 16px;
+        }
+
+        .case-info {
+            padding: 1.5rem;
+        }
+
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            min-width: auto;
+        }
+
+        .rating-form {
+            padding: 2rem;
+        }
+
+        .star {
+            font-size: 2.5rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>Rate Your Lawyer</h1>
+        <p>Your feedback helps us improve our service and assists other clients</p>
+    </div>
+</div>
+
+<!-- Rating Container -->
+<div class="rating-container">
+    <!-- Case Info -->
+    <div class="case-info">
+        <div class="info-row">
+            <span class="info-label">Case:</span>
+            <span class="info-value">{{ case.description[:100] }}{% if case.description|length > 100 %}...{% endif %}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Lawyer:</span>
+            <span class="info-value">{{ lawyer.name }}</span>
+        </div>
+    </div>
+
+    <!-- Rating Form -->
+    <form method="POST" class="rating-form" id="ratingForm">
+        <!-- Rating Stars -->
+        <div class="form-group">
+            <label>How would you rate your experience?</label>
+            <div class="star-rating" id="starRating">
+                <span class="star" data-rating="1"></span>
+                <span class="star" data-rating="2"></span>
+                <span class="star" data-rating="3"></span>
+                <span class="star" data-rating="4"></span>
+                <span class="star" data-rating="5"></span>
+            </div>
+            <input type="hidden" id="rating" name="rating" value="0" required>
+        </div>
+
+        <!-- Rating Preview -->
+        <div class="rating-preview" id="ratingPreview">
+            <div class="preview-text">Your rating: <span id="previewRating">0</span> out of 5</div>
+            <div class="preview-stars" id="previewStars">☆☆☆☆☆</div>
+        </div>
+
+        <!-- Comment -->
+        <div class="form-group">
+            <label for="comment">Share your experience (Optional)</label>
+            <textarea id="comment" name="comment" placeholder="Tell us about your experience with this lawyer..." maxlength="500"></textarea>
+            <div class="char-count" id="charCount">0 / 500</div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-section">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Submit Rating
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Star Rating System
+const stars = document.querySelectorAll('.star');
+const ratingInput = document.getElementById('rating');
+const ratingPreview = document.getElementById('ratingPreview');
+const previewRating = document.getElementById('previewRating');
+const previewStars = document.getElementById('previewStars');
+const ratingForm = document.getElementById('ratingForm');
+
+let currentRating = 0;
+
+const ratingTexts = {
+    1: 'Poor - Very dissatisfied',
+    2: 'Fair - Somewhat dissatisfied',
+    3: 'Good - Satisfied',
+    4: 'Very Good - Very satisfied',
+    5: 'Excellent - Extremely satisfied'
+};
+
+stars.forEach((star, index) => {
+    star.addEventListener('click', function() {
+        currentRating = index + 1;
+        ratingInput.value = currentRating;
+        updateStars();
+        updatePreview();
+    });
+
+    star.addEventListener('mouseenter', function() {
+        const hoverRating = index + 1;
+        highlightStars(hoverRating);
+    });
+});
+
+document.getElementById('starRating').addEventListener('mouseleave', function() {
+    updateStars();
+});
+
+function updateStars() {
+    stars.forEach((star, index) => {
+        if (index < currentRating) {
+            star.classList.add('filled', 'active');
+        } else {
+            star.classList.remove('filled', 'active');
+        }
+    });
+}
+
+function highlightStars(rating) {
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+}
+
+function updatePreview() {
+    if (currentRating > 0) {
+        ratingPreview.classList.add('show');
+        previewRating.textContent = currentRating;
+        previewStars.textContent = '★'.repeat(currentRating) + '☆'.repeat(5 - currentRating);
+        previewStars.style.color = 'var(--warning-color)';
+    } else {
+        ratingPreview.classList.remove('show');
+    }
+}
+
+// Character Count
+const commentTextarea = document.getElementById('comment');
+const charCount = document.getElementById('charCount');
+
+commentTextarea.addEventListener('input', function() {
+    const length = this.value.length;
+    charCount.textContent = `${length} / 500`;
+    
+    if (length > 450) {
+        charCount.classList.add('warning');
+    } else {
+        charCount.classList.remove('warning');
+    }
+    
+    if (length >= 500) {
+        charCount.classList.add('error');
+    } else {
+        charCount.classList.remove('error');
+    }
+});
+
+// Form Submission
+ratingForm.addEventListener('submit', function(e) {
+    if (currentRating === 0) {
+        e.preventDefault();
+        alert('Please select a rating before submitting');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
+    
+    // In a real app, form would be submitted here
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Rating';
+        
+        // Show success message
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message show';
+        successDiv.innerHTML = 'Thank you for your feedback! Your rating has been submitted successfully.';
+        ratingForm.parentNode.insertBefore(successDiv, ratingForm);
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 2000);
+});
+
+// Add loading spinner style
+const style = document.createElement('style');
+style.textContent = `
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

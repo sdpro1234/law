@@ -1,0 +1,747 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --info-color: #4299e1;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .users-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    /* Search and Filter Bar */
+    .search-filter-container {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .search-filter-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .search-wrapper {
+        flex: 1;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background-color: var(--light-bg);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        background-color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    .search-wrapper::before {
+        content: '🔍';
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        transition: var(--transition);
+    }
+
+    .search-wrapper:focus-within::before {
+        color: var(--secondary-color);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .filter-wrapper {
+        position: relative;
+    }
+
+    .filter-select {
+        padding: 0.875rem 2.5rem 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+        background-color: var(--light-bg);
+        cursor: pointer;
+        appearance: none;
+        min-width: 150px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        background-color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    .filter-wrapper::after {
+        content: '▼';
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        pointer-events: none;
+        transition: var(--transition);
+    }
+
+    .filter-wrapper:focus-within::after {
+        color: var(--secondary-color);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    /* Users Table */
+    .table-container {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        position: relative;
+        animation: slideInUp 0.8s ease-out 0.4s both;
+    }
+
+    .table-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        position: relative;
+        z-index: 1;
+    }
+
+    thead {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+    }
+
+    th {
+        padding: 1.25rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        transition: var(--transition);
+    }
+
+    th:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition);
+        animation: fadeInUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    tbody tr:nth-child(2) { animation-delay: 0.2s; }
+    tbody tr:nth-child(3) { animation-delay: 0.3s; }
+    tbody tr:nth-child(4) { animation-delay: 0.4s; }
+    tbody tr:nth-child(5) { animation-delay: 0.5s; }
+    tbody tr:nth-child(6) { animation-delay: 0.6s; }
+    tbody tr:nth-child(7) { animation-delay: 0.7s; }
+    tbody tr:nth-child(8) { animation-delay: 0.8s; }
+    tbody tr:nth-child(9) { animation-delay: 0.9s; }
+    tbody tr:nth-child(10) { animation-delay: 1.0s; }
+
+    tbody tr:hover {
+        background: var(--light-bg);
+        transform: translateX(5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    td {
+        padding: 1.25rem 1rem;
+        font-size: 1rem;
+        position: relative;
+    }
+
+    /* User Name Cell */
+    .user-name {
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-name::before {
+        content: '👤';
+        font-size: 1.2rem;
+    }
+
+    /* Email Cell */
+    .user-email {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-email::before {
+        content: '✉️';
+        font-size: 1rem;
+    }
+
+    /* Role Badge */
+    .role-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .role-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .role-badge:hover::before {
+        left: 100%;
+    }
+
+    .role-client {
+        background: linear-gradient(135deg, var(--info-color), #3182ce);
+        color: var(--white);
+    }
+
+    .role-lawyer {
+        background: linear-gradient(135deg, var(--success-color), #38a169);
+        color: var(--white);
+    }
+
+    .role-admin {
+        background: linear-gradient(135deg, var(--danger-color), #e53e3e);
+        color: var(--white);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .status-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .status-badge:hover::before {
+        left: 100%;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, var(--success-color), #38a169);
+        color: var(--white);
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, var(--warning-color), #dd6b20);
+        color: var(--white);
+    }
+
+    /* Date Cell */
+    .date-cell {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .date-cell::before {
+        content: '📅';
+        font-size: 1rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .button-small {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        border: none;
+    }
+
+    .button-edit {
+        background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+        color: var(--white);
+    }
+
+    .button-edit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-edit:hover::before {
+        left: 100%;
+    }
+
+    .button-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-edit::after {
+        content: '✏️';
+        font-size: 0.8rem;
+        margin-left: 0.25rem;
+    }
+
+    .button-danger {
+        background: linear-gradient(135deg, var(--danger-color), #e53e3e);
+        color: var(--white);
+    }
+
+    .button-danger::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-danger:hover::before {
+        left: 100%;
+    }
+
+    .button-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        background: linear-gradient(135deg, #e53e3e, #c53030);
+    }
+
+    .button-danger::after {
+        content: '🗑️';
+        font-size: 0.8rem;
+        margin-left: 0.25rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+        animation: fadeIn 1s ease-out;
+    }
+
+    .empty-state::before {
+        content: '👥';
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .users-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .search-filter-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-input,
+        .filter-select {
+            width: 100%;
+        }
+
+        .data-table {
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 1rem 0.75rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            min-width: 800px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .button-small {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        th, td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .role-badge,
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<div class="users-container">
+    <h1>All Users</h1>
+    
+    <div class="search-filter-container">
+        <div class="search-wrapper">
+            <input type="text" placeholder="Search by name or email..." class="search-input">
+        </div>
+        <div class="filter-wrapper">
+            <select name="role_filter" class="filter-select">
+                <option value="all">All Roles</option>
+                <option value="client">Clients</option>
+                <option value="lawyer">Lawyers</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        {% if users %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><div class="user-name">{{ user.name or 'N/A' }}</div></td>
+                    <td><div class="user-email">{{ user.email }}</div></td>
+                    <td><span class="role-badge role-{{ user.role }}">{{ user.role.title() }}</span></td>
+                    <td>
+                        {% if user.role == 'lawyer' %}
+                            <span class="status-badge badge-{{ 'success' if user.is_verified else 'warning' }}">
+                                {{ 'Verified' if user.is_verified else 'Pending' }}
+                            </span>
+                        {% else %}
+                            <span class="status-badge badge-success">Active</span>
+                        {% endif %}
+                    </td>
+                    <td><div class="date-cell">{{ user.created_at.strftime('%Y-%m-%d') }}</div></td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="#" class="button-small button-edit">Edit</a>
+                            <a href="#" class="button-small button-danger">Deactivate</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            No users found.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Add interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate table rows on hover
+        const tableRows = document.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px) scale(1.01)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+        
+        // Add ripple effect to buttons
+        const buttons = document.querySelectorAll('.button-small');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        
+        // Add sorting functionality (visual only)
+        const tableHeaders = document.querySelectorAll('th');
+        tableHeaders.forEach(header => {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function() {
+                // Add a subtle animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+        
+        // Search functionality (visual only)
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', function() {
+            // Add visual feedback
+            this.style.borderColor = this.value ? 'var(--success-color)' : 'var(--border-color)';
+        });
+    });
+</script>
+
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    /* Make buttons relative for ripple effect */
+    .button-small {
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

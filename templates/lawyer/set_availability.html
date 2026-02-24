@@ -1,0 +1,687 @@
+{% extends 'base.html' %}
+{% block title %}Set Availability{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+        color: var(--text-primary);
+    }
+
+    .availability-container {
+        max-width: 800px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        border-radius: 2px;
+        animation: expandWidth 1.5s ease-out forwards;
+    }
+
+    /* Availability Card */
+    .card {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .availability-form {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Days Selection */
+    .days-section {
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.3s both;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title::before {
+        content: '📅';
+        font-size: 1.2rem;
+    }
+
+    .days-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .day-checkbox {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: var(--light-bg);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .day-checkbox:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .day-checkbox input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .custom-checkbox {
+        width: 24px;
+        height: 24px;
+        background: var(--white);
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        margin-right: 0.75rem;
+        position: relative;
+        transition: var(--transition);
+        flex-shrink: 0;
+    }
+
+    .day-checkbox input[type="checkbox"]:checked ~ .custom-checkbox {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-color: var(--primary-color);
+        animation: checkPulse 0.4s ease;
+    }
+
+    @keyframes checkPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .custom-checkbox::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 7px;
+        width: 6px;
+        height: 12px;
+        border: solid var(--white);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg) scale(0);
+        transition: transform 0.2s ease;
+    }
+
+    .day-checkbox input[type="checkbox"]:checked ~ .custom-checkbox::after {
+        transform: rotate(45deg) scale(1);
+    }
+
+    .day-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        transition: var(--transition);
+    }
+
+    .day-checkbox input[type="checkbox"]:checked ~ .day-label {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .day-checkbox input[type="checkbox"]:checked ~ .day-label::after {
+        content: ' ✓';
+        color: var(--success-color);
+    }
+
+    /* Time Selection */
+    .time-section {
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.5s both;
+    }
+
+    .time-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .time-input-group {
+        position: relative;
+    }
+
+    .time-input-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    .time-input-wrapper {
+        position: relative;
+    }
+
+    .time-input-wrapper::before {
+        content: '🕐';
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        z-index: 1;
+        transition: var(--transition);
+    }
+
+    .time-input-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--light-bg), #e2e8f0);
+        border-radius: 12px;
+        z-index: 0;
+        transition: var(--transition);
+    }
+
+    .time-input-wrapper:focus-within::before {
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .time-input-wrapper:focus-within::after {
+        background: var(--white);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+    }
+
+    input[type="time"] {
+        width: 100%;
+        padding: 1rem 1.25rem 1rem 3rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        background: transparent;
+        position: relative;
+        z-index: 1;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    input[type="time"]:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    /* Button Group */
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        animation: fadeInUp 0.8s ease-out 0.7s both;
+    }
+
+    .button-primary,
+    .button-secondary {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        text-align: center;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .button-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: var(--white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .button-primary:hover::before {
+        left: 100%;
+    }
+
+    .button-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+    }
+
+    .button-primary::after {
+        content: '✓';
+        font-size: 0.9rem;
+    }
+
+    .button-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .button-secondary:hover {
+        background: var(--primary-color);
+        color: var(--white);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .button-secondary::after {
+        content: '✕';
+        font-size: 0.9rem;
+    }
+
+    /* Success Message */
+    .success-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--success-color);
+        color: var(--white);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(400px);
+        transition: transform 0.5s ease;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .success-message.show {
+        transform: translateX(0);
+    }
+
+    .success-message::before {
+        content: '✓';
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+            opacity: 0;
+        }
+        to {
+            width: 100px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .availability-container {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .card {
+            padding: 1.5rem;
+        }
+
+        .days-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .time-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .button-primary,
+        .button-secondary {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+
+        .card {
+            padding: 1rem;
+        }
+
+        .days-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="availability-container">
+    <h1>Set Your Availability</h1>
+    
+    <div class="card">
+        <form method="post" class="availability-form">
+            <!-- Days Selection -->
+            <div class="days-section">
+                <h2 class="section-title">Select Available Days</h2>
+                <div class="days-grid">
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="mon" {% if current.days and 'mon' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Monday</span>
+                    </label>
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="tue" {% if current.days and 'tue' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Tuesday</span>
+                    </label>
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="wed" {% if current.days and 'wed' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Wednesday</span>
+                    </label>
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="thu" {% if current.days and 'thu' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Thursday</span>
+                    </label>
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="fri" {% if current.days and 'fri' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Friday</span>
+                    </label>
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="sat" {% if current.days and 'sat' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Saturday</span>
+                    </label>
+                    <label class="day-checkbox">
+                        <input type="checkbox" name="days" value="sun" {% if current.days and 'sun' in current.days %}checked{% endif %}/>
+                        <span class="custom-checkbox"></span>
+                        <span class="day-label">Sunday</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Time Selection -->
+            <div class="time-section">
+                <h2 class="section-title">Working Hours</h2>
+                <div class="time-grid">
+                    <div class="time-input-group">
+                        <label for="start">Start Time</label>
+                        <div class="time-input-wrapper">
+                            <input type="time" name="start" id="start" value="{{ current.start or '09:00' }}" required>
+                        </div>
+                    </div>
+                    <div class="time-input-group">
+                        <label for="end">End Time</label>
+                        <div class="time-input-wrapper">
+                            <input type="time" name="end" id="end" value="{{ current.end or '17:00' }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="button-group">
+                <button class="button-primary" type="submit">Save Availability</button>
+                <a class="button-secondary" href="{{ url_for('lawyer.appointment_schedule') }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success Message (hidden by default) -->
+<div class="success-message" id="success-message">
+    Availability saved successfully!
+</div>
+
+<script>
+    // Form submission with animation
+    document.querySelector('.availability-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const saveButton = document.querySelector('.button-primary');
+        const originalText = saveButton.innerHTML;
+        
+        // Show loading state
+        saveButton.innerHTML = 'Saving...';
+        saveButton.style.background = 'linear-gradient(135deg, var(--warning-color), #dd6b20)';
+        saveButton.disabled = true;
+        
+        // Simulate API call (remove this in production)
+        setTimeout(() => {
+            // Reset button
+            saveButton.innerHTML = 'Saved!';
+            saveButton.style.background = 'linear-gradient(135deg, var(--success-color), #38a169)';
+            
+            // Show success message
+            const successMessage = document.getElementById('success-message');
+            successMessage.classList.add('show');
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                saveButton.innerHTML = originalText;
+                saveButton.style.background = '';
+                saveButton.disabled = false;
+            }, 2000);
+        }, 1500);
+    });
+    
+    // Add ripple effect to buttons
+    document.querySelectorAll('.button-primary, .button-secondary').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.tagName === 'A') return; // Skip for links
+            
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add interactive checkbox animations
+    document.querySelectorAll('.day-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            // Add a subtle bounce animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    
+    // Time validation
+    const startTime = document.getElementById('start');
+    const endTime = document.getElementById('end');
+    
+    function validateTimeRange() {
+        if (startTime.value && endTime.value) {
+            if (startTime.value >= endTime.value) {
+                endTime.setCustomValidity('End time must be after start time');
+            } else {
+                endTime.setCustomValidity('');
+            }
+        }
+    }
+    
+    startTime.addEventListener('change', validateTimeRange);
+    endTime.addEventListener('change', validateTimeRange);
+</script>
+
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    /* Make buttons relative for ripple effect */
+    .button-primary, .button-secondary {
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

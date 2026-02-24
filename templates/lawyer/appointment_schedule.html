@@ -1,0 +1,898 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --primary-light: #2c5282;
+        --primary-dark: #0f1f3d;
+        --secondary-color: #3182ce;
+        --accent-color: #4299e1;
+        --accent-light: #90cdf4;
+        --success-color: #48bb78;
+        --warning-color: #ed8936;
+        --danger-color: #f56565;
+        --light-bg: #f7fafc;
+        --white: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: var(--white);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Schedule Container */
+    .schedule-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    /* Calendar View */
+    .calendar-view {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .calendar-view::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    @keyframes gradient {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+
+    .calendar-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .calendar-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .calendar-title::before {
+        content: "📅";
+        font-size: 1.5rem;
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .calendar-nav button {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .calendar-nav button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    .calendar-month {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Calendar Grid */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        padding: 1rem;
+        background: var(--light-bg);
+    }
+
+    .calendar-weekday {
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-secondary);
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--white);
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .calendar-day:hover {
+        background: var(--secondary-color);
+        color: var(--white);
+        transform: scale(1.05);
+        box-shadow: var(--shadow-md);
+    }
+
+    .calendar-day.other-month {
+        color: var(--text-secondary);
+        background: transparent;
+        cursor: default;
+    }
+
+    .calendar-day.other-month:hover {
+        background: transparent;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .calendar-day.today {
+        background: var(--primary-color);
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .calendar-day.selected {
+        background: var(--accent-color);
+        color: var(--white);
+        font-weight: 600;
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Appointments List */
+    .appointments-list {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .appointments-list::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        animation: gradient 3s ease infinite;
+    }
+
+    .appointments-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 1.5rem;
+        border-radius: 12px 12px 0 0;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .appointments-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .appointments-title::before {
+        content: "📅";
+        font-size: 1.5rem;
+    }
+
+    /* Appointment Cards */
+    .appointment-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .appointment-card:nth-child(1) { animation-delay: 0.1s; }
+    .appointment-card:nth-child(2) { animation-delay: 0.2s; }
+    .appointment-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .appointment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .appointment-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .appointment-info {
+        flex: 1;
+    }
+
+    .appointment-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .appointment-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .appointment-time {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .appointment-time::before {
+        content: "🕐";
+        font-size: 1rem;
+    }
+
+    .appointment-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--light-bg);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .appointment-type.video::before {
+        content: "📹";
+    }
+
+    .appointment-type.phone::before {
+        content: "📞";
+    }
+
+    .appointment-type.in-person::before {
+        content: "👥";
+    }
+
+    .appointment-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .action-btn {
+        background: var(--white);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.625rem 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(66, 153, 225, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    /* Availability Card */
+    .availability-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .availability-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--success-color), var(--accent-color));
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .availability-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .availability-card:hover::before {
+        transform: scaleY(1);
+    }
+
+    .availability-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .availability-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .availability-title::before {
+        content: "⏰";
+        font-size: 1.5rem;
+    }
+
+    .availability-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .availability-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .availability-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 100px;
+    }
+
+    .availability-value {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    /* Availability Form */
+    .availability-form {
+        margin-top: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .submit-btn::after {
+        content: "💾";
+        font-size: 1.2rem;
+    }
+
+    /* Toggle View Button */
+    .view-toggle {
+        background: var(--light-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        margin-top: 2rem;
+        text-align: center;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .toggle-btn {
+        background: var(--white);
+        color: var(--text-primary);
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 600;
+    }
+
+    .toggle-btn:hover {
+        background: var(--secondary-color);
+        color: var(--white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .schedule-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .calendar-view,
+        .appointments-list,
+        .availability-card {
+            margin: 0 1rem;
+        }
+
+        .calendar-header {
+            padding: 1rem;
+        }
+
+        .calendar-grid {
+            padding: 0.5rem;
+            gap: 0.5rem;
+        }
+
+        .appointment-card {
+            padding: 1rem;
+        }
+
+        .appointment-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>My Schedule</h1>
+        <p>Manage your availability and upcoming appointments</p>
+    </div>
+</div>
+
+<!-- Schedule Container -->
+<div class="schedule-container">
+    <!-- Calendar View -->
+    <div class="calendar-view">
+        <div class="calendar-header">
+            <div class="calendar-title">Calendar</div>
+            <div class="calendar-nav">
+                <button id="prevMonth">‹</button>
+                <div class="calendar-month" id="currentMonth">June 2024</div>
+                <button id="nextMonth">›</button>
+            </div>
+        </div>
+        
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar would be populated with JavaScript -->
+        </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="appointments-list">
+        <div class="appointments-header">
+            <div class="appointments-title">Upcoming Appointments</div>
+        </div>
+        
+        {% for appt in upcoming_appointments %}
+        <div class="appointment-card">
+            <div class="appointment-header">
+                <div class="appointment-info">
+                    <div class="appointment-title">{{ appt.case.title if appt.case else 'Consultation' }}</div>
+                    <div class="appointment-meta">
+                        <div class="appointment-time">
+                            <span>{{ appt.timestamp.strftime('%A, %B %d, %Y at %I:%M %p') }}</span>
+                        </div>
+                        <div class="appointment-type {{ appt.type }}">
+                            {% if appt.type == 'video' %}Video Call{% endif %}
+                            {% if appt.type == 'phone' %}Phone Call{% endif %}
+                            {% if appt.type == 'in-person' %}In-Person{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="appointment-content">
+                <p>{{ appt.case.description[:100] }}{% if appt.case.description|length > 100 %}...{% endif %}</p>
+            </div>
+            
+            <div class="appointment-actions">
+                <a href="{{ url_for('lawyer.join_appointment', appt_id=appt.id) }}" class="action-btn">Join Call</a>
+                <a href="{{ url_for('lawyer.reschedule_appointment', appt_id=appt.id) }}" class="action-btn secondary">Reschedule</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if not upcoming_appointments %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <h3>No Upcoming Appointments</h3>
+        <p>You don't have any upcoming appointments scheduled. Check your calendar for availability or book new appointments with clients.</p>
+        <a href="{{ url_for('lawyer.case_requests') }}" class="action-btn">View Appointment Requests</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Availability Card -->
+{% if availability %}
+<div class="availability-card">
+    <div class="availability-header">
+        <div class="availability-title">Current Availability</div>
+    </div>
+    
+    <div class="availability-info">
+        <div class="availability-item">
+            <span class="availability-label">Days:</span>
+            <span class="availability-value">{{ availability.days|join(', ') or 'Not set' }}</span>
+        </div>
+        <div class="availability-item">
+            <span class="availability-label">Time:</span>
+            <span class="availability-value">{{ availability.start }} - {{ availability.end }}</span>
+        </div>
+    </div>
+    
+    <form method="post" action="{{ url_for('lawyer.update_availability') }}" class="availability-form">
+        <div class="form-group">
+            <label for="days">Available Days</label>
+            <select name="days" id="days" multiple>
+                <option value="monday" {% if 'monday' in availability.days %}selected{% endif %}>Monday</option>
+                <option value="tuesday" {% if 'tuesday' in availability.days %}selected{% endif %}>Tuesday</option>
+                <option value="wednesday" {% if 'wednesday' in availability.days %}selected{% endif %}>Wednesday</option>
+                <option value="thursday" {% if 'thursday' in availability.days %}selected{% endif %}>Thursday</option>
+                <option value="friday" {% if 'friday' in availability.days %}selected{% endif %}>Friday</option>
+                <option value="saturday" {% if 'saturday' in availability.days %}selected{% endif %}>Saturday</option>
+                <option value="sunday" {% if 'sunday' in availability.days %}selected{% endif %}>Sunday</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="start_time">Start Time</label>
+            <input type="time" name="start_time" id="start_time" value="{{ availability.start }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="end_time">End Time</label>
+            <input type="time" name="end_time" id="end_time" value="{{ availability.end }}">
+        </div>
+        
+        <button type="submit" class="submit-btn">Update Availability</button>
+    </form>
+</div>
+{% endif %}
+
+<!-- View Toggle -->
+<div class="view-toggle">
+    <button class="toggle-btn" onclick="toggleView('calendar')">Calendar View</button>
+    <button class="toggle-btn" onclick="toggleView('list')">List View</button>
+</div>
+
+<script>
+// Calendar functionality
+function generateCalendar(year, month) {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const currentMonth = document.getElementById('currentMonth');
+    const firstDay = new Date(year, month, 1).getDay();
+    
+    // Clear existing calendar
+    calendarGrid.innerHTML = '';
+    
+    // Add weekday headers
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    weekdays.forEach(day => {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-weekday';
+        dayElement.textContent = day;
+        calendarGrid.appendChild(dayElement);
+    });
+    
+    // Add empty cells for first week
+    for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day other-month';
+        calendarGrid.appendChild(emptyDay);
+    }
+    
+    // Add days of the month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        dayElement.onclick = () => selectDate(year, month, day);
+        calendarGrid.appendChild(dayElement);
+    }
+    
+    // Update month display
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    currentMonth.textContent = `${monthNames[month]} ${year}`;
+}
+
+function selectDate(year, month, day) {
+    // Remove previous selection
+    document.querySelectorAll('.calendar-day.selected').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    // Add selection to clicked date
+    event.target.classList.add('selected');
+}
+
+// Month navigation
+document.getElementById('prevMonth').addEventListener('click', () => {
+    const currentDate = new Date(document.getElementById('currentMonth').textContent);
+    const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    generateCalendar(prevMonth.getFullYear(), prevMonth.getMonth());
+});
+
+document.getElementById('nextMonth').addEventListener('click', () => {
+    const currentDate = new Date(document.getElementById('currentMonth').textContent);
+    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    generateCalendar(nextMonth.getFullYear(), nextMonth.getMonth());
+});
+
+// Initialize calendar for current month
+const now = new Date();
+generateCalendar(now.getFullYear(), now.getMonth());
+
+// View toggle functionality
+function toggleView(view) {
+    const calendarView = document.querySelector('.calendar-view');
+    const appointmentsList = document.querySelector('.appointments-list');
+    
+    if (view === 'calendar') {
+        calendarView.style.display = 'block';
+        appointmentsList.style.display = 'none';
+    } else {
+        calendarView.style.display = 'none';
+        appointmentsList.style.display = 'block';
+    }
+}
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.appointment-card, .availability-card').forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    card.style.transitionDelay = `${index * 0.1}s`;
+    observer.observe(card);
+});
+</script>
+{% endblock %}
